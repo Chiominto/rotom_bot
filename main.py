@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 from utils.cache.central_cache_loader import load_all_cache
 from utils.db.get_pg_pool import get_pg_pool
 from utils.logs.pretty_log import pretty_log, set_bot
-
+from utils.background_task.scheduled_task.scheduler import setup_scheduler
 # ---- Intents / Bot ----
 intents = discord.Intents.default()
 intents.members = True
@@ -63,6 +63,8 @@ async def load_extensions():
     _loaded_count = len(loaded_cogs)
     pretty_log("ready", f"✅ Loaded { _loaded_count} cogs")
 
+    # Setup the scheduler after loading cogs
+    await setup_scheduler(bot)
 
 # 🟣────────────────────────────────────────────
 #         ⚡ On Ready ⚡
