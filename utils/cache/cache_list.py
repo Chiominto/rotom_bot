@@ -92,6 +92,16 @@ wb_battle_alert_cache: dict[int, dict] = {}
 #   "notify": str
 # }
 
+
+# 🔮────────────────────────────────────────────
+#        ⚡ Egg Alert Cache
+# 👻────────────────────────────────────────────
+egg_alert_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "notify": str
+# }
 # 🔮────────────────────────────────────────────
 #        ⚡ EV Tracker Cache
 # 👻────────────────────────────────────────────

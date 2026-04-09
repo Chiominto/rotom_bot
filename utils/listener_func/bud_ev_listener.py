@@ -15,7 +15,7 @@ from utils.logs.pretty_log import pretty_log
 
 
 # 🤍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-#   ✨ Espeon Core Function › EV Tracker Embed Sync Handler ✨
+#   ✨ Rotom Core Function › EV Tracker Embed Sync Handler ✨
 # 🤍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 async def handle_pokemeow_embed_sync(bot, message: discord.Message):
     """

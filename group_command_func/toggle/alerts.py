@@ -6,6 +6,10 @@ from utils.db.faction_ball_alert_db_func import (
     fetch_user_faction_ball_alert,
     upsert_user_faction_ball_alert,
 )
+from utils.db.egg_alert_db_func import (
+    fetch_user_egg_alert,
+    upsert_user_egg_alert,
+)
 from utils.db.wb_fight_db import fetch_user_wb_battle_alert, upsert_user_wb_battle_alert
 from utils.functions.safe_response import safe_respond
 from utils.logs.pretty_log import pretty_log
@@ -21,15 +25,18 @@ async def alert_settings_func(bot: commands.Bot, interaction: discord.Interactio
         faction_ball_alert = await fetch_user_faction_ball_alert(
             bot, interaction.user.id
         )
+        egg_alert = await fetch_user_egg_alert(bot, interaction.user.id)
 
         faction_ball_alert = faction_ball_alert or {"notify": "off"}
         wb_battle_alert = wb_battle_alert or {"notify": "off"}
+        egg_alert = egg_alert or {"notify": "off"}
 
         view = AlertSettingsView(
             bot,
             interaction.user,
             faction_ball_alert,
             wb_battle_alert,
+            egg_alert=egg_alert,
         )
 
         message = await interaction.followup.send(
@@ -59,12 +66,14 @@ class AlertSettingsView(discord.ui.View):
         user: discord.Member,
         faction_ball_alert,
         wb_battle_alert,
+        egg_alert,
     ):
         super().__init__(timeout=180)
         self.bot = bot
         self.user = user
         self.faction_ball_alert = faction_ball_alert
         self.wb_battle_alert = wb_battle_alert
+        self.egg_alert = egg_alert
         self.message = None  # set later
         self.update_button_styles()
 
@@ -196,6 +205,74 @@ class AlertSettingsView(discord.ui.View):
                 ephemeral=True,
             )
     # 💫────────────────────────────────────
+    # [🥚 BUTTON] Egg Hatch/Hold Alert (3 -State Cycle)
+    # 💫────────────────────────────────────
+    @discord.ui.button(
+        label="Egg Hatch/Hold Alert: OFF",
+        style=ButtonStyle.secondary,
+        emoji="🥚",
+    )
+    async def egg_alert_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "You cannot interact with this button.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+        try:
+            current_state = (
+                str(self.egg_alert.get("notify", "off")).lower()
+                if self.egg_alert
+                else "off"
+            )
+
+            # 🔹 3-State Cycle: off → on → on_no_pings → off
+            if current_state == "off":
+                new_state = "on"
+            elif current_state == "on":
+                new_state = "on_no_pings"
+            else:  # react or any other state
+                new_state = "off"
+
+            await upsert_user_egg_alert(self.bot, self.user, new_state)
+            self.egg_alert = {"notify": new_state}
+
+            # 🔹 Refresh buttons
+            self.update_button_styles()
+
+            # 🔹 Display friendly text
+            display_text = {
+                "off": "OFF",
+                "on": "ON",
+                "on_no_pings": "ON (No Pings)",
+            }.get(new_state, "OFF")
+
+            await interaction.edit_original_response(
+                content=f"Modify your Alert Settings:\n🥚 Egg Hatch/Hold Alert set to **{display_text}**",
+                view=self,
+            )
+
+            pretty_log(
+                tag="ui",
+                message=f"{self.user.display_name} set Egg Hatch/Hold Alert to {display_text}",
+                bot=self.bot,
+            )
+
+        except Exception as e:
+            pretty_log(
+                tag="error",
+                message=f"Error toggling Egg Hatch/Hold Alert: {e}",
+                bot=self.bot,
+            )
+            await interaction.followup.send(
+                "⚠️ An error occurred while updating Egg Hatch/Hold Alert.",
+                ephemeral=True,
+            )
+
+    # 💫────────────────────────────────────
     # [🎨 STYLE UPDATE FUNCTION]
     # 💫────────────────────────────────────
     def update_button_styles(self):
@@ -238,6 +315,25 @@ class AlertSettingsView(discord.ui.View):
         else:
             self.wb_battle_alert_button.style = ButtonStyle.secondary
             self.wb_battle_alert_button.label = "World Boss Battle Alert: OFF"
+
+        # 🥚 Egg Alert Button (3 states)
+        egg_alert_state = (
+            str(self.egg_alert.get("notify", "off")).lower()
+            if self.egg_alert
+            else "off"
+        )
+        if egg_alert_state == "off":
+            self.egg_alert_button.style = ButtonStyle.secondary
+            self.egg_alert_button.label = "Egg Hatch/Hold Alert: OFF"
+        elif egg_alert_state == "on":
+            self.egg_alert_button.style = ButtonStyle.success
+            self.egg_alert_button.label = "Egg Hatch/Hold Alert: ON"
+        elif egg_alert_state == "on_no_pings":
+            self.egg_alert_button.style = ButtonStyle.primary
+            self.egg_alert_button.label = "Egg Hatch/Hold Alert: ON (No Pings)"
+        else:
+            self.egg_alert_button.style = ButtonStyle.secondary
+            self.egg_alert_button.label = "Egg Hatch/Hold Alert: OFF"
 
     # 💫────────────────────────────────────
     # [⏰ TIMEOUT HANDLER]

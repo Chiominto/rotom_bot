@@ -1,4 +1,6 @@
 class Emojis:
+    egg = "<:Rotom_egg:1491765883222097920>"
+    egg_shake = "<a:Rotom_egg_bounce:1491765885805793371>"
     mega = "<:Mega:1348638409345859637>"
     loading = "<a:colorful_loading:1324199044456779807>"
     check = "<a:green_check:1308730918692851733>"

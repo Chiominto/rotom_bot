@@ -13,6 +13,7 @@ from utils.listener_func.faction_ball_listener import (
     extract_faction_ball_from_daily,
     extract_faction_ball_from_fa,
 )
+from utils.listener_func.egg_alert_listener import egg_ready_to_hatch_listener, egg_hatched_listener
 from utils.logs.pretty_log import pretty_log
 from utils.listener_func.market_view_listener import market_view_listener
 
@@ -146,6 +147,31 @@ class MessageCreateListener(commands.Cog):
                 message=f"Processing market view message with embed author: {first_embed_author}",
             )
             await market_view_listener(self.bot, message)
+
+        # ————————————————————————————————
+        # ⚡ Egg Ready to Hatch LISTENER
+        # ————————————————————————————————
+        if message.content and message.author.id == POKEMEOW_APPLICATION_ID:
+            if (
+                "your egg is ready to hatch! `/egg hatch` to hatch it."
+                in message.content
+            ):
+                await egg_ready_to_hatch_listener(bot=self.bot, message=message)
+        # ————————————————————————————————
+        # ⚡ Egg Hatched LISTENER
+        # ————————————————————————————————
+        if first_embed:
+            if (
+                first_embed_footer
+                and "PokeMeow | Egg Hatch" in first_embed.footer.text
+            ):
+                pretty_log(
+                    "info",
+                    f"🔹 Matched Egg Hatched Listener | message_id={message.id}",
+                )
+                await egg_hatched_listener(bot=self.bot, message=message)
+
+
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────
