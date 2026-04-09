@@ -91,3 +91,43 @@ wb_battle_alert_cache: dict[int, dict] = {}
 #   "user_name": str,
 #   "notify": str
 # }
+
+# 🔮────────────────────────────────────────────
+#        ⚡ EV Tracker Cache
+# 👻────────────────────────────────────────────
+ev_tracker_cache: dict[int, dict] = {}
+# user_id -> {"user_name": str, "pokemon": str, "dex_number": int, "evs": dict, "goals": dict}
+# Structure
+# {
+#   user_id: {
+#       "user_name": str,
+#       "pokemon": str,
+#       "dex_number": int,
+#        "emoji_id": str,
+#       "evs": {
+#           "hp": int,
+#           "atk": int,
+#           "def": int,
+#           "spa": int,
+#           "spd": int,
+#           "spe": int,
+#       },
+#       "goals": {
+#           "hp": int,
+#           "atk": int,
+#           "def": int,
+#           "spa": int,
+#           "spd": int,
+#           "spe": int,
+#       },
+#   }
+
+
+# 🧩────────────────────────────────────────────
+#        ⚡ Pokémon List Cache
+# 🧩────────────────────────────────────────────
+pokemon_list_cache: dict[str, int] = {}
+# Structure:
+# pokemon_list_cache = {
+#     "pokemon_name": "dex_number",
+#     }

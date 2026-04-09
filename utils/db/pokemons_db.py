@@ -3,6 +3,7 @@ from datetime import datetime
 import discord
 
 from utils.logs.pretty_log import pretty_log
+from utils.cache.cache_list import pokemon_cache
 
 # SQL SCRIPT
 """CREATE TABLE pokemons (
@@ -17,7 +18,162 @@ from utils.logs.pretty_log import pretty_log
     image_link TEXT,
     last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );"""
+async def update_market_value_via_listener(
+    bot,
+    pokemon_name: str,
+    lowest_market: int,
+    listing_seen: str,
+    current_listing: int = None,
+    image_link: str = None,
+    emoji_id: str = None,
+):
+    """
+    Update market value data for a Pokémon based on market view listener input.
+    If exists, else insert new record with minimal data.
+    Only updates lowest_market and listing_seen fields.
+    """
+    pokemon_name = pokemon_name.lower()
+    if current_listing is None:
+        current_listing = lowest_market
+    try:
+        async with bot.pg_pool.acquire() as conn:
+            # Always upsert emoji_id if provided
+            if emoji_id is not None:
+                await conn.execute(
+                    """
+                    INSERT INTO market_value (
+                        pokemon_name, lowest_market, listing_seen, last_updated, current_listing, image_link, emoji_id
+                    )
+                    VALUES ($1, $2, $3, $4, $5, $6, $7)
+                    ON CONFLICT (pokemon_name) DO UPDATE SET
+                        lowest_market = $2,
+                        listing_seen = $3,
+                        last_updated = $4,
+                        current_listing = $5,
+                        image_link = $6,
+                        emoji_id = $7
+                    """,
+                    pokemon_name,
+                    lowest_market,
+                    listing_seen,
+                    datetime.utcnow(),
+                    current_listing,
+                    image_link,
+                    emoji_id,
+                )
+            elif image_link is not None:
+                await conn.execute(
+                    """
+                    INSERT INTO market_value (
+                        pokemon_name, lowest_market, listing_seen, last_updated, current_listing, image_link
+                    )
+                    VALUES ($1, $2, $3, $4, $5, $6)
+                    ON CONFLICT (pokemon_name) DO UPDATE SET
+                        lowest_market = $2,
+                        listing_seen = $3,
+                        last_updated = $4,
+                        current_listing = $5,
+                        image_link = $6
+                    """,
+                    pokemon_name,
+                    lowest_market,
+                    listing_seen,
+                    datetime.utcnow(),
+                    current_listing,
+                    image_link,
+                )
+            else:
+                await conn.execute(
+                    """
+                    INSERT INTO market_value (
+                        pokemon_name, lowest_market, listing_seen, last_updated, current_listing
+                    )
+                    VALUES ($1, $2, $3, $4, $5)
+                    ON CONFLICT (pokemon_name) DO UPDATE SET
+                        lowest_market = $2,
+                        listing_seen = $3,
+                        last_updated = $4,
+                        current_listing = $5
+                    """,
+                    pokemon_name,
+                    lowest_market,
+                    listing_seen,
+                    datetime.utcnow(),
+                    current_listing,
+                )
 
+            # Update in cache as well
+            if pokemon_name in pokemon_cache:
+                pokemon_cache[pokemon_name]["lowest_market"] = lowest_market
+                pokemon_cache[pokemon_name]["listing_seen"] = listing_seen
+                pokemon_cache[pokemon_name]["current_listing"] = current_listing
+                if image_link is not None:
+                    pokemon_cache[pokemon_name]["image_link"] = image_link
+                if emoji_id is not None:
+                    pokemon_cache[pokemon_name]["emoji_id"] = emoji_id
+                pretty_log(
+                    tag="cache",
+                    message=f"Updated market value for {pokemon_name} via listener: lowest_market={lowest_market:,}, listing_seen={listing_seen}, current_listing={current_listing:,}"
+                    + (f", image_link updated" if image_link is not None else "")
+                    + (f", emoji_id updated" if emoji_id is not None else ""),
+                )
+            else:
+                pokemon_cache[pokemon_name] = {
+                    "pokemon": pokemon_name,
+                    "lowest_market": lowest_market,
+                    "listing_seen": listing_seen,
+                    "current_listing": current_listing,
+                    "image_link": image_link if image_link is not None else None,
+                    "emoji_id": emoji_id if emoji_id is not None else None,
+                }
+                pretty_log(
+                    tag="cache",
+                    message=f"Added new market value for {pokemon_name} via listener: lowest_market={lowest_market:,}, listing_seen={listing_seen}, current_listing={current_listing:,}"
+                    + (f", image_link set" if image_link is not None else "")
+                    + (f", emoji_id set" if emoji_id is not None else ""),
+                )
+        pretty_log(
+            tag="db",
+            message=f"Updated market value for {pokemon_name} via listener: lowest_market={lowest_market:,}, listing_seen={listing_seen}, current_listing={current_listing:,}"
+            + (f", image_link updated" if image_link is not None else "")
+            + (f", emoji_id updated" if emoji_id is not None else ""),
+        )
+    except Exception as e:
+        pretty_log(
+            tag="error",
+            message=f"Failed to update market value for {pokemon_name} via listener: {e}",
+        )
+
+
+async def fetch_emoji_id_db(bot: discord.Client, pokemon_name: str) -> str | None:
+    """Fetch the emoji ID for a given Pokémon from the database."""
+    try:
+        async with bot.pg_pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT emoji_id FROM pokemons
+                WHERE pokemon_name = $1;
+                """,
+                pokemon_name.lower(),
+            )
+            if row and row["emoji_id"]:
+                pretty_log(
+                    "db",
+                    f"✅ Fetched emoji ID for Pokémon '{pokemon_name}' from database.",
+                )
+                return row["emoji_id"]
+            else:
+                pretty_log(
+                    "db",
+                    f"⚠️ No emoji ID found for Pokémon '{pokemon_name}' in database.",
+                )
+                return None
+    except Exception as e:
+        pretty_log(
+            "db",
+            f"❌ Error fetching emoji ID for Pokémon '{pokemon_name}' from database: {e}",
+        )
+        return None
 
 async def upsert_pokemon_db(
     bot: discord,

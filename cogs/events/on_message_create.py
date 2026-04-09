@@ -5,12 +5,21 @@ from constants.celestial_constants import (
     CC_SERVER_ID,
     CELESTIAL_TEXT_CHANNELS,
     POKEMEOW_APPLICATION_ID,
-
+)
+from utils.listener_func.bud_ev_listener import handle_pokemeow_embed_sync
+from utils.listener_func.ev_tracker_listener import handle_pokemeow_battle_message
+from utils.listener_func.faction_ball_alert import faction_ball_alert
+from utils.listener_func.faction_ball_listener import (
+    extract_faction_ball_from_daily,
+    extract_faction_ball_from_fa,
 )
 from utils.logs.pretty_log import pretty_log
-from utils.listener_func.faction_ball_alert import faction_ball_alert
-from utils.listener_func.faction_ball_listener import extract_faction_ball_from_daily, extract_faction_ball_from_fa
+from utils.listener_func.market_view_listener import market_view_listener
+
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
+
+triggers = {"bud_info_trigger": "**Level**:", "ev_training": "won the battle"}
+
 
 # 🟣────────────────────────────────────────────
 #         💤 Message Create Listener Cog
@@ -74,17 +83,12 @@ class MessageCreateListener(commands.Cog):
         # ⚡ Daily Command Faction Ball Extraction
         # ————————————————————————————————
         if first_embed:
-            if (
-                first_embed.title
-                and "daily streak" in first_embed.title.lower()
-            ):
+            if first_embed.title and "daily streak" in first_embed.title.lower():
                 pretty_log(
                     "info",
                     f"Matched Daily Faction Ball Listener | Message ID: {message.id} | Channel: {message.channel.name}",
                 )
-                await extract_faction_ball_from_daily(
-                    bot=self.bot, message=message
-                )
+                await extract_faction_ball_from_daily(bot=self.bot, message=message)
         # ————————————————————————————————
         # ⚡ Faction Command Faction Ball Extraction
         # ————————————————————————————————
@@ -92,10 +96,56 @@ class MessageCreateListener(commands.Cog):
             if first_embed.author and any(
                 f in first_embed.author.name.lower() for f in FACTIONS
             ):
-                await extract_faction_ball_from_fa(
-                    bot=self.bot, message=message
+                await extract_faction_ball_from_fa(bot=self.bot, message=message)
+        # ————————————————————————————————
+        # ⚡ EV Training Listener
+        # ————————————————————————————————
+        if content and triggers["ev_training"] in content:
+            pretty_log(
+                "info",
+                f"Matched EV Training Listener | Message ID: {message.id} | Channel: {message.channel.name}",
+            )
+            try:
+                await handle_pokemeow_battle_message(bot=self.bot, message=message)
+            except Exception as e:
+                pretty_log(
+                    "error",
+                    f"Error in EV Training Listener for message {message.id}: {e}",
                 )
 
+        # ————————————————————————————————
+        # ⚡ EV Tracker Bud Info
+        # ————————————————————————————————
+        if (
+            first_embed_description
+            and triggers["bud_info_trigger"] in first_embed_description
+        ):
+            pretty_log(
+                "info",
+                f"Matched EV Tracker Bud Info Listener | Message ID: {message.id} | Channel: {message.channel.name}",
+            )
+            try:
+                await handle_pokemeow_embed_sync(bot=self.bot, message=message)
+            except Exception as e:
+                pretty_log(
+                    "error",
+                    f"Error in EV Tracker Bud Info Listener for message {message.id}: {e}",
+                )
+
+        # ————————————————————————————————
+        # ⚡ MARKET VIEW LISTENER
+        # ————————————————————————————————
+        if (
+            first_embed
+            and "PokeMeow Global Market" in first_embed_author
+            and not "Recent" in first_embed_author
+            and not "Rarity" in first_embed_author
+        ):
+            pretty_log(
+                tag="info",
+                message=f"Processing market view message with embed author: {first_embed_author}",
+            )
+            await market_view_listener(self.bot, message)
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────
