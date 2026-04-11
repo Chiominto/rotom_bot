@@ -54,3 +54,9 @@ class Emojis:
     lum_berry = "<:lum_berry:1491426961388736723>"
     liechi_berry = "<:liechi_berry:1491426973669658634>"
     kelpsy_berry = "<:kelpsy_berry:1491426998721974272>"
+
+class Dividers:
+    command = "https://media.discordapp.net/attachments/1393740397905313912/1492445431534452807/image.png?ex=69db5b9f&is=69da0a1f&hm=cfe2045c7565dd7be1e494ff49fecffb1c83ec1c7ae51164e546e537325bf187&=&format=webp&quality=lossless&width=1865&height=124"
+
+class Thumbnails:
+    command = "https://media.discordapp.net/attachments/1393740397905313912/1492443426266943508/image.png?ex=69db59c1&is=69da0841&hm=0f7d83b8ba2cb81fc9107157495027b23d163ad4400dac257a38fdced7a35709&=&format=webp&quality=lossless&width=480&height=480"
