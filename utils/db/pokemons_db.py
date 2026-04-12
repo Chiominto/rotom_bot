@@ -41,7 +41,7 @@ async def update_market_value_via_listener(
             if emoji_id is not None:
                 await conn.execute(
                     """
-                    INSERT INTO market_value (
+                    INSERT INTO pokemons (
                         pokemon_name, lowest_market, listing_seen, last_updated, current_listing, image_link, emoji_id
                     )
                     VALUES ($1, $2, $3, $4, $5, $6, $7)
@@ -64,7 +64,7 @@ async def update_market_value_via_listener(
             elif image_link is not None:
                 await conn.execute(
                     """
-                    INSERT INTO market_value (
+                    INSERT INTO pokemons (
                         pokemon_name, lowest_market, listing_seen, last_updated, current_listing, image_link
                     )
                     VALUES ($1, $2, $3, $4, $5, $6)
@@ -85,7 +85,7 @@ async def update_market_value_via_listener(
             else:
                 await conn.execute(
                     """
-                    INSERT INTO market_value (
+                    INSERT INTO pokemons (
                         pokemon_name, lowest_market, listing_seen, last_updated, current_listing
                     )
                     VALUES ($1, $2, $3, $4, $5)
@@ -225,7 +225,7 @@ async def upsert_pokemon_db(
         )
 
 
-async def update_market_value(
+async def update_pokemons(
     bot: discord.Client,
     pokemon_name: str,
     dex_number: int,

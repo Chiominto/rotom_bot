@@ -251,6 +251,6 @@ def is_mon_in_game(pokemon_name: str) -> bool:
 
     pokemon_name_formatted = format_name_for_pokemons_db_lookup(pokemon_name)
 
-    market_value = fetch_pokemon_cache_entry(pokemon_name_formatted)
+    pokemon = fetch_pokemon_cache_entry(pokemon_name_formatted)
 
-    return market_value is not None
+    return pokemon is not None
