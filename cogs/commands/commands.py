@@ -3,7 +3,7 @@ from discord import app_commands
 from discord.ext import commands
 
 from constants.aesthetics import Dividers, Thumbnails
-from constants.celestial_constants import CELESTIAL_SERVER_ID, DEFAULT_EMBED_COLOR, CELESTIAL_ROLES
+from constants.celestial_constants import CELESTIALS_SERVER_ID, DEFAULT_EMBED_COLOR, CELESTIAL_ROLES
 from utils.logs.pretty_log import pretty_log
 
 MAIN_DIVIDER = Dividers.command
@@ -221,9 +221,9 @@ class CommandsView(commands.Cog):
     async def commands(self, interaction: discord.Interaction):
         try:
             await interaction.response.defer(thinking=True)
-            guild = self.bot.get_guild(CELESTIAL_SERVER_ID)
+            guild = self.bot.get_guild(CELESTIALS_SERVER_ID)
             user = interaction.user
-            #guild_obj = discord.Object(id=CELESTIAL_SERVER_ID)
+            # guild_obj = discord.Object(id=CELESTIAL_SERVER_ID)
 
             # Staff check
             # Flatten commands
