@@ -2,6 +2,7 @@ import discord
 
 from utils.logs.pretty_log import pretty_log
 import time
+from constants.aesthetics import *
 # SQL TABLE
 """CREATE TABLE berry_reminder (
     user_id BIGINT,
@@ -28,130 +29,129 @@ FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION = (8 * 3600) + (
 )  # 8 hours 20 minutes in seconds
 FIVE_H_BERRY_MOISTURE_DRY_OUT_DURATION = 10 * 3600  # 10 hours in seconds
 SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION = 13 * 3600  # 13 hours in seconds
-
 berry_map = {
     "oran berry": {
-        # "emoji": Emojis.oran_berry,
+        "emoji": Emojis.oran_berry,
         "growth_duration": 2,
         "moisture_dry_out_duration": TWO_H_MOISTURE_DRY_OUT_DURATION,
     },
     "cheri berry": {
-        # "emoji": Emojis.cheri_berry,
+        "emoji": Emojis.cheri_berry,
         "growth_duration": 2,
         "moisture_dry_out_duration": TWO_H_MOISTURE_DRY_OUT_DURATION,
     },
     "rawst berry": {
-        # "emoji": Emojis.rawst_berry,
+        "emoji": Emojis.rawst_berry,
         "growth_duration": 2,
         "moisture_dry_out_duration": TWO_H_MOISTURE_DRY_OUT_DURATION,
     },
     "pecha berry": {
-        # "emoji": Emojis.pecha_berry,
+        "emoji": Emojis.pecha_berry,
         "growth_duration": 2,
         "moisture_dry_out_duration": TWO_H_MOISTURE_DRY_OUT_DURATION,
     },
     "aspear berry": {
-        # "emoji": Emojis.aspear_berry,
+        "emoji": Emojis.aspear_berry,
         "growth_duration": 2,
         "moisture_dry_out_duration": TWO_H_MOISTURE_DRY_OUT_DURATION,
     },
     "sitrus berry": {
-        # "emoji": Emojis.sitrus_berry,
+        "emoji": Emojis.sitrus_berry,
         "growth_duration": 2,
         "moisture_dry_out_duration": TWO_H_MOISTURE_DRY_OUT_DURATION,
     },
     "salac berry": {
-        # "emoji": Emojis.salac_berry,
+        "emoji": Emojis.salac_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "chesto berry": {
-        # "emoji": Emojis.chesto_berry,
+        "emoji": Emojis.chesto_berry,
         "growth_duration": 3,
         "moisture_dry_out_duration": THREE_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "persim berry": {
-        # "emoji": Emojis.persim_berry,
+        "emoji": Emojis.persim_berry,
         "growth_duration": 3,
         "moisture_dry_out_duration": THREE_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "pomeg berry": {
-        # "emoji": Emojis.pomeg_berry,
+        "emoji": Emojis.pomeg_berry,
         "growth_duration": 4,
         "moisture_dry_out_duration": FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "kelpsy berry": {
-        # "emoji": Emojis.kelpsy_berry,
+        "emoji": Emojis.kelpsy_berry,
         "growth_duration": 4,
         "moisture_dry_out_duration": FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "qualot berry": {
-        #  "emoji": Emojis.qualot_berry,
+        "emoji": Emojis.qualot_berry,
         "growth_duration": 4,
         "moisture_dry_out_duration": FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "hondew berry": {
-        # "emoji": Emojis.hondew_berry,
+        "emoji": Emojis.hondew_berry,
         "growth_duration": 4,
         "moisture_dry_out_duration": FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "grepa berry": {
-        # "emoji": Emojis.grepa_berry,
+        "emoji": Emojis.grepa_berry,
         "growth_duration": 4,
         "moisture_dry_out_duration": FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "tamato berry": {
-        # "emoji": Emojis.tomato_berry,
+        "emoji": Emojis.tomato_berry,
         "growth_duration": 4,
         "moisture_dry_out_duration": FOUR_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "lum berry": {
-        # "emoji": Emojis.lum_berry,
+        "emoji": Emojis.lum_berry,
         "growth_duration": 5,
         "moisture_dry_out_duration": FIVE_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "occa berry": {
-        # "emoji": Emojis.occa_berry,
+        "emoji": Emojis.occa_berry,
         "growth_duration": 5,
         "moisture_dry_out_duration": FIVE_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "yache berry": {
-        #  "emoji": Emojis.yache_berry,
+        "emoji": Emojis.yache_berry,
         "growth_duration": 5,
         "moisture_dry_out_duration": FIVE_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "shuca berry": {
-        #  "emoji": Emojis.shuca_berry,
+        "emoji": Emojis.shuca_berry,
         "growth_duration": 5,
         "moisture_dry_out_duration": FIVE_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "chople berry": {
-        # "emoji": Emojis.chople_berry,
+        "emoji": Emojis.chople_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "rindo berry": {
-        # "emoji": Emojis.rindo_berry,
+        "emoji": Emojis.rindo_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "wacan berry": {
-        # "emoji": Emojis.chople_berry,
+        "emoji": Emojis.wacan_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "passho berry": {
-        # "emoji": Emojis.chople_berry,
+        "emoji": Emojis.passho_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "liechi berry": {
-        # "emoji": Emojis.chople_berry,
+        "emoji": Emojis.liechi_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
     "petaya berry": {
-        # "emoji": Emojis.chople_berry,
+        "emoji": Emojis.petaya_berry,
         "growth_duration": 6,
         "moisture_dry_out_duration": SIX_H_BERRY_MOISTURE_DRY_OUT_DURATION,
     },
@@ -429,8 +429,9 @@ async def fetch_all_due_berry_reminders(bot: discord.Client):
         pretty_log("warn", f"Failed to fetch due berry reminders: {e}")
         return []
 
+
 async def update_moisture_dries_on_func(
-        bot: discord.Client, user_id: int, slot_number: int, berry_name: str
+    bot: discord.Client, user_id: int, slot_number: int, berry_name: str
 ):
     """Updates the moisture_dries_on time for a specific berry reminder based on the watering time."""
     try:
@@ -447,6 +448,7 @@ async def update_moisture_dries_on_func(
             "warn",
             f"Failed to update moisture_dries_on for user {user_id} in slot {slot_number} with berry '{berry_name}': {e}",
         )
+
 
 async def update_moisture_dries_on(
     bot: discord.Client, user_id: int, slot_number: int, moisture_dries_on: int

@@ -14,6 +14,7 @@ from utils.db.wb_fight_db import fetch_user_wb_battle_alert, upsert_user_wb_batt
 from utils.functions.safe_response import safe_respond
 from utils.logs.pretty_log import pretty_log
 from constants.celestial_constants import CELESTIAL_EMOJIS
+from constants.aesthetics import Emojis
 # 💗────────────────────────────────────────────
 # [🎀 FUNCTION] Alert Settings
 # 💗────────────────────────────────────────────
@@ -152,7 +153,7 @@ class AlertSettingsView(discord.ui.View):
     @discord.ui.button(
         label="World Boss Battle Alert: OFF",
         style=ButtonStyle.secondary,
-        emoji=CELESTIAL_EMOJIS.world_boss_spawned,
+        emoji=Emojis.wb_spawn,
     )
     async def wb_battle_alert_button(
         self, interaction: discord.Interaction, button: discord.ui.Button

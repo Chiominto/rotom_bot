@@ -141,3 +141,18 @@ pokemon_list_cache: dict[str, int] = {}
 # pokemon_list_cache = {
 #     "pokemon_name": "dex_number",
 #     }
+
+# 🧩────────────────────────────────────────────
+#        ⚡ Celestial Members Cache
+# 🧩────────────────────────────────────────────
+celestial_members_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "pokemon_name": str,
+#   "channel_id": int
+#   "actual_perks": str
+#   "clan_bank_donation": int
+#   "clan_treasury_doantion": int
+#   "date_joined": int
+# }

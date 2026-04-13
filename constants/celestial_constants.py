@@ -7,42 +7,51 @@ KHY_USER_ID = 952071312124313611
 BURGER_USER_ID = 682429434720288797
 ERROR_LOG_CHANNEL_ID = 1444997181244444672
 a = 1490116594884411402
+
+
 # 💦☁────────────────────────────────────────────💦☁
 #       CELESTIAL_TEXT_CHANNELS
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_TEXT_CHANNELS:
 
-
-# 🌊💙🤍───────────── Admin ─────────────💙🤍🌊
-
+    # 🌊💙🤍───────────── Admin ─────────────💙🤍🌊
+    roles_breakdown = 1492921526591291563
     moderator_only = 1490470353099817033
     server_logs = 1490599209940947035
     message_logs = 1490599308012290138
     commands = 1490599712435212368
     todo_list = 1490602637878366208
 
-# 🌊💙🤍───────────── Market ─────────────💙🤍🌊
+    # 🌊💙🤍───────────── Market ─────────────💙🤍🌊
 
     legendmegagmax_feed = 1490880875171283106
     shiny_feed = 1490880740400042196
     golden_feed = 1490880670204170341
     market_snipe = 1490887466255646861
+    trade_negotiation = 1490428433728147496
     curs_feed = 1490881002866872390
 
-# 🌊💙🤍───────────── Uncategorized ─────────────💙🤍🌊
+    # 🌊💙🤍───────────── Uncategorized ─────────────💙🤍🌊
 
     rules = 1490470353099817030
 
-# 🌊💙🤍───────────── _Neighborhood ─────────────💙🤍🌊
+    # 🌊💙🤍───────────── Clan_Members_Only ─────────────💙🤍🌊
 
     clan_ideas = 1490419812042801283
+    donations = 1492032552654077992
+    clan_ad = 1490719859733168261
+    monthly_payouts = 1492033362418991195
+    giveaways = 1492032448584745155
+
+    # 🌊💙🤍───────────── _Neighborhood ─────────────💙🤍🌊
+
+    off_topic = 1492732522516189225
     fries_shrine = 1490430544847306752
     general = 1490495511634116778
     autospawn = 1491259323526021150
-    clan_ad = 1490719859733168261
     founders_chat = 1490116595664683180
 
-# 🌊💙🤍───────────── _Players_Channels ─────────────💙🤍🌊
+    # 🌊💙🤍───────────── _Celestial_Clan_Play_Area ─────────────💙🤍🌊
 
     notkleptor = 1490118098861293628
     burger = 1490117441945079960
@@ -52,12 +61,20 @@ class CELESTIAL_TEXT_CHANNELS:
     fries = 1490117652230705234
     kleptorlol = 1490117903704522793
 
-# 🌊💙🤍───────────── Pocketmonster_Street ─────────────💙🤍🌊
+    # 🌊💙🤍───────────── Guest_Play_Area ─────────────💙🤍🌊
 
+    wailords_waves = 1491978303232409670
+    pikachus_playground = 1491978511727202476
+    sunflora_sauna = 1491978136286396477
+    shuckles_swamp = 1491977981462053144
+    iggly_haven = 1491400336857108661
+
+    # 🌊💙🤍───────────── Pocketmonster_Street ─────────────💙🤍🌊
+
+    bumps = 1491445438258352320
     rare_spawns = 1490876341690831118
     battle_unlocks = 1490876557219332146
     waterstate_monitor = 1490888139986833489
-    trade_negotiation = 1490428433728147496
     news = 1491351198455042129
 
 
@@ -66,8 +83,7 @@ class CELESTIAL_TEXT_CHANNELS:
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_VOICE_CHANNELS:
 
-
-# 🌊💙🤍───────────── Voice_Channels ─────────────💙🤍🌊
+    # 🌊💙🤍───────────── Voice_Channels ─────────────💙🤍🌊
 
     lobby = 1490116595664683183
     gaming = 1490116595664683184
@@ -80,9 +96,11 @@ class CELESTIAL_CATEGORIES:
 
     ADMIN = 1490598993393352704
     MARKET = 1490875682639843461
+    CLAN_MEMBERS_ONLY = 1492031927417307156
     _NEIGHBORHOOD = 1490116595664683179
-    _PLAYERS_CHANNELS = 1490117523864158431
+    _CELESTIAL_CLAN_PLAY_AREA = 1490117523864158431
     VOICE_CHANNELS = 1490116595664683182
+    GUEST_PLAY_AREA = 1491977558802043083
     POCKETMONSTER_STREET = 1490427928134291566
 
 
@@ -90,19 +108,20 @@ class CELESTIAL_CATEGORIES:
 #       CELESTIAL_ROLES
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_ROLES:
-    staff = 1492431851573481533
+    giveaways = 1493045397575438470
     _unknown = 1490876248577020086
     pokémeow = 1490117261824884991
     meowhelper = 1490157032890699829
     clan_owner_ = 1490425164779753684
     co_owner = 1490509552079212594
     helper = 1490509049140347082
+    staff = 1492431851573481533
+    muted = 1490468193268011069
     founders_ = 1490176919650701373
     shucklehub = 1491046285858312312
-    shellshuckle_ = 1490424806179471361
-    khys_takoyaki_shop = 1490494779790983350
+    celestialnova_ = 1490424806179471361
+    aurora_aide_ = 1490494779790983350
     carl_bot = 1490466598094373110
-    muted = 1490468193268011069
     adventurer = 1490471537894101043
     npc = 1490472107287515223
     asia = 1490480975828877453
@@ -121,7 +140,6 @@ class CELESTIAL_ROLES:
     hatenna = 1490652070292881428
     as_spawn_ping = 1490877166454440096
     as_rarespawn_ping = 1490877230056738888
-    new_role = 1490894703070285926
     trade_ads = 1491353382642909194
     common_snipe = 1490897419062218792
     uncommon_snipe = 1490897542039208127
@@ -138,11 +156,29 @@ class CELESTIAL_ROLES:
     discohook_utils = 1491352658043338785
     jockie_music = 1491352762343096380
     quickvids = 1491352866705899593
+    driftingstar = 1491408886882631711
+    calm_waters = 1491422559953227796
+    golden_waters = 1491422664202522736
+    os_lottery = 1491449796320559175
+    battle_tower = 1491449861642649680
+    elite_server_booster = 1491991752234631330
+    top_catcher = 1491991867334594680
+    server_booster = 1492070911795269662
+    tip_jar_titan = 1492514117775392828
+    coin_saver = 1492514196829765752
+    giveaway_boat = 1492696000584745112
+    grounded = 1492705946357600400
+    out_of_orbit = 1492706123806019704
+    nqn = 1492707949863501926
+    shiny_bonus = 1492909238618558664
+    ee_ping = 1492909386949984418
 
 
 # 💦☁────────────────────────────────────────────💦☁
 #       CELESTIAL_EMOJIS
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_EMOJIS:
-    world_boss_spawned = "<:world_boss_spawned:1300780186073170051>"
+
     lordfry = "<:LordFry:1490453099008102410>"
+    sparkles = "<a:sparkles:1492709079108288574>"
+    snorlax_coin = "<:snorlax_coin:1492785677518114906>"

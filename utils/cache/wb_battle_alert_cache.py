@@ -86,3 +86,17 @@ def remove_wb_battle_alert_cache(user_id: int):
             "info",
             f"Removed world boss battle alert for user {user_name} from cache.",
         )
+
+def fetch_wb_battle_alert_notify_cache(user_id: int) -> str | None:
+    """
+    Fetch the notification preference for a specific user from the world boss battle alert cache.
+
+    Args:
+        user_id: The Discord user ID.
+    Returns:
+        The notification preference string if the user exists in the cache, otherwise None.
+    """
+    alert_info = wb_battle_alert_cache.get(user_id)
+    if alert_info:
+        return alert_info.get("notify")
+    return None

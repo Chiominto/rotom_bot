@@ -54,9 +54,15 @@ class Emojis:
     lum_berry = "<:lum_berry:1491426961388736723>"
     liechi_berry = "<:liechi_berry:1491426973669658634>"
     kelpsy_berry = "<:kelpsy_berry:1491426998721974272>"
+    aspear_berry = "<:aspear_berry:1493066174135799828>"
+    wb_spawn = "<:world_boss_spawned:1300780186073170051>"
 
 class Dividers:
     command = "https://media.discordapp.net/attachments/1393740397905313912/1492445431534452807/image.png?ex=69db5b9f&is=69da0a1f&hm=cfe2045c7565dd7be1e494ff49fecffb1c83ec1c7ae51164e546e537325bf187&=&format=webp&quality=lossless&width=1865&height=124"
 
 class Thumbnails:
     command = "https://media.discordapp.net/attachments/1393740397905313912/1492443426266943508/image.png?ex=69db59c1&is=69da0841&hm=0f7d83b8ba2cb81fc9107157495027b23d163ad4400dac257a38fdced7a35709&=&format=webp&quality=lossless&width=480&height=480"
+    plant = "https://media.discordapp.net/attachments/1394913073520967680/1493053504854425662/image.png?ex=69dd91ef&is=69dc406f&hm=277f1c98446c01d09d8205462b87a30892ac7731ac4e9e8ea5154dd5ad5b6a52&=&format=webp&quality=lossless&width=450&height=450"
+    harvest = "https://media.discordapp.net/attachments/1394913073520967680/1493054040156672181/image.png?ex=69dd926e&is=69dc40ee&hm=1071a71309cee0af0aeae11d7e3ada49a754c0cbe9e658f2f8a9f8b6a960cdae&=&format=webp&quality=lossless&width=450&height=450"
+    water = "https://media.discordapp.net/attachments/1394913073520967680/1493054108595257344/image.png?ex=69dd927f&is=69dc40ff&hm=b8a7e2388e78b4df517bdb152681e4a293efe5e9a49e1e6bfc2275a50131e3d3&=&format=webp&quality=lossless&width=450&height=450"
+    drought = "https://media.discordapp.net/attachments/1394913073520967680/1493054165981859900/image.png?ex=69dd928c&is=69dc410c&hm=477948b20ba944a9b1c12f0d3697b6813344e33efa0b9b3104657e95b96d99d5&=&format=webp&quality=lossless&width=450&height=450"

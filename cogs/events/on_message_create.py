@@ -16,6 +16,12 @@ from utils.listener_func.faction_ball_listener import (
 from utils.listener_func.egg_alert_listener import egg_ready_to_hatch_listener, egg_hatched_listener
 from utils.logs.pretty_log import pretty_log
 from utils.listener_func.market_view_listener import market_view_listener
+from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
+from utils.listener_func.berry_listener import berry_listener
+from utils.listener_func.berry_water_listener import (
+    handle_berry_water_message,
+    handle_mulch_message,
+)
 
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 
@@ -171,7 +177,66 @@ class MessageCreateListener(commands.Cog):
                 )
                 await egg_hatched_listener(bot=self.bot, message=message)
 
+        # ————————————————————————————————
+        # ⚡ Berry Listener
+        # ————————————————————————————————
+        if first_embed:
+            if (
+                first_embed_description
+                and "garden overview" in first_embed_description.lower()
+            ):
+                pretty_log(
+                    "info",
+                    "Detected Garden Overview embed, processing berry reminders...",
+                )
+                await berry_listener(
+                    bot=self.bot,
+                    before_message=message,
+                    message=message,
+                )
 
+        # ————————————————————————————————
+        # ⚡ Berry Water Listener
+        # ————————————————————————————————
+        if message.content:
+            if "Watered" in message.content and "Next stage" in message.content:
+                pretty_log(
+                    "info",
+                    "Detected Berry Water message, processing berry water reminders...",
+                )
+                await handle_berry_water_message(bot=self.bot, message=message)
+
+        # ————————————————————————————————
+        # ⚡ Berry Mulch Listener
+        # ————————————————————————————————
+        if message.content:
+            if (
+                "Applied" in message.content
+                and "Mulch" in message.content
+                and "to Slot" in message.content
+            ):
+                pretty_log(
+                    "info",
+                    "Detected Mulch message, processing growth mulch reminders...",
+                )
+                await handle_mulch_message(bot=self.bot, message=message)
+
+        # ————————————————————————————————
+        # ⚡ WB Battle Reminder Registration Listener
+        # ————————————————————————————————
+        if first_embed:
+            if first_embed_description:
+                if (
+                    "<:checkedbox:752302633141665812> You are registered for this fight"
+                    in first_embed_description
+                    and ";wb fight" in first_embed_description
+                ):
+                    await register_wb_battle_reminder(
+                        bot=self.bot, message=message
+                    )
+
+
+                    
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────

@@ -19,3 +19,5 @@ from utils.functions.webhook_func import send_webhook
 from utils.essentials.format import format_comma_pokecoins
 
 from utils.functions.command_safe import run_command_safe
+
+from constants.celestial_constants import *
