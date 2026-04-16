@@ -23,7 +23,7 @@ class HELD_ITEM_EMOJI:
     softsand = Emojis.Soft_Sand
     spelltag = Emojis.Spell_Tag
     twistedspoon = Emojis.Twisted_Spoon
-    electrizer = "<:electrizer:1411666555258929292>"
+    electrizer = Emojis.Electirizer
     magmarizer = Emojis.Magmarizer
     blackglasses = Emojis.BlackGlasses
     charcoal = Emojis.Charcoal

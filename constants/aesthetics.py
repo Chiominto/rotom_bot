@@ -91,6 +91,7 @@ class Emojis:
     assault_vest = "<:assault_vest:1494187079322697788>"
 
 
+
 class Dividers:
     command = "https://media.discordapp.net/attachments/1393740397905313912/1492445431534452807/image.png?ex=69db5b9f&is=69da0a1f&hm=cfe2045c7565dd7be1e494ff49fecffb1c83ec1c7ae51164e546e537325bf187&=&format=webp&quality=lossless&width=1865&height=124"
 
