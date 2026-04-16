@@ -100,7 +100,10 @@ async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
                 continue
 
             try:
-                await message.channel.send(f"<@{target_user.id}> {msg}")
+                mention_str = f"<@{target_user.id}>"
+                if user_item_alert == "on_no_pings":
+                    mention_str = f"**{target_user.name}**"
+                await message.channel.send(f"{mention_str} {msg}")
                 pretty_log(
                     "info",
                     f"Pinged {target_user.id} for {pokemon_name}",
