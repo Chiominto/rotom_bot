@@ -22,6 +22,7 @@ from utils.listener_func.berry_water_listener import (
     handle_berry_water_message,
     handle_mulch_message,
 )
+from utils.listener_func.held_item_ping import held_item_ping_handler
 
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 
@@ -234,9 +235,15 @@ class MessageCreateListener(commands.Cog):
                     await register_wb_battle_reminder(
                         bot=self.bot, message=message
                     )
-
-
-                    
+        # ————————————————————————————————
+        # ⚡ Held Item Ping Listener
+        # ————————————————————————————————
+        if (
+            first_embed_description
+            and "<:held_item:" in first_embed_description
+        ):
+            await held_item_ping_handler(self.bot, message)
+            
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────

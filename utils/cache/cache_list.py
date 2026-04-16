@@ -102,6 +102,16 @@ egg_alert_cache: dict[int, dict] = {}
 #   "user_name": str,
 #   "notify": str
 # }
+
+# 🔮────────────────────────────────────────────
+#        ⚡ Item Alert Cache
+# 👻────────────────────────────────────────────
+item_alert_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "notify": str
+# }
 # 🔮────────────────────────────────────────────
 #        ⚡ EV Tracker Cache
 # 👻────────────────────────────────────────────
