@@ -166,3 +166,27 @@ celestial_members_cache: dict[int, dict] = {}
 #   "clan_treasury_doantion": int
 #   "date_joined": int
 # }
+
+# 🧩────────────────────────────────────────────
+#        ⚡ Timers Cache
+# 🧩────────────────────────────────────────────
+timer_cache: dict[int, dict[str, str]] = {}
+# Structure:
+# {
+#   user_id: {
+#     "user_name": str,
+#     "pokemon_setting": str,
+#     "fish_setting": str,
+#     "battle_setting": str
+#   },
+#   ...
+
+
+not_battle_timer_user_cache: set[str] = set()
+battle_timer_users_cache: dict[str, str] = {}
+
+# Structure:
+# battle_timer_users_cache = {
+#    "user_name" : str,
+#    ...
+# }

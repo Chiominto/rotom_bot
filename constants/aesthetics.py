@@ -23,7 +23,7 @@ class Emojis:
     masterball = "<:masterball:1491304329066578093>"
     aqua = "<:aqua:1491304388038492300>"
     flare = "<:flare:1491304390458605618>"
-    galatic = "<:galatic:1491304393604202548>"
+    galactic = "<:galatic:1491304393604202548>"
     magma = "<:magma:1491304396510990458>"
     plasma = "<:plasma:1491304399044214874>"
     rocket = "<:rocket:1491304401879564369>"
@@ -89,8 +89,9 @@ class Emojis:
     moonball = "<:moonball:1494180441908056095>"
     duskball = "<:duskball:1494180404276625479>"
     assault_vest = "<:assault_vest:1494187079322697788>"
-
-
+    Wooper = "<:Wooper:1497788118940516462>"
+    Shuckle = "<:Shuckle:1497788134195462154>"
+    Voltorb = "<:Voltorb:1497788102163304559>"
 
 class Dividers:
     command = "https://media.discordapp.net/attachments/1393740397905313912/1492445431534452807/image.png?ex=69db5b9f&is=69da0a1f&hm=cfe2045c7565dd7be1e494ff49fecffb1c83ec1c7ae51164e546e537325bf187&=&format=webp&quality=lossless&width=1865&height=124"
@@ -101,3 +102,8 @@ class Thumbnails:
     harvest = "https://media.discordapp.net/attachments/1394913073520967680/1493054040156672181/image.png?ex=69dd926e&is=69dc40ee&hm=1071a71309cee0af0aeae11d7e3ada49a754c0cbe9e658f2f8a9f8b6a960cdae&=&format=webp&quality=lossless&width=450&height=450"
     water = "https://media.discordapp.net/attachments/1394913073520967680/1493054108595257344/image.png?ex=69dd927f&is=69dc40ff&hm=b8a7e2388e78b4df517bdb152681e4a293efe5e9a49e1e6bfc2275a50131e3d3&=&format=webp&quality=lossless&width=450&height=450"
     drought = "https://media.discordapp.net/attachments/1394913073520967680/1493054165981859900/image.png?ex=69dd928c&is=69dc410c&hm=477948b20ba944a9b1c12f0d3697b6813344e33efa0b9b3104657e95b96d99d5&=&format=webp&quality=lossless&width=450&height=450"
+
+
+POKEMON_TIMER_EMOJI = Emojis.Voltorb
+BATTLE_TIMER_EMOJI = Emojis.Shuckle
+FISH_TIMER_EMOJI = Emojis.Wooper

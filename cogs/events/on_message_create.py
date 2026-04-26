@@ -23,7 +23,9 @@ from utils.listener_func.berry_water_listener import (
     handle_mulch_message,
 )
 from utils.listener_func.held_item_ping import held_item_ping_handler
-
+from utils.listener_func.pokemon_timer import detect_pokemeow_reply
+from utils.listener_func.fish_timer import fish_timer_handler
+from utils.listener_func.battle_timer import detect_pokemeow_battle
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 
 triggers = {"bud_info_trigger": "**Level**:", "ev_training": "won the battle"}
@@ -77,6 +79,34 @@ class MessageCreateListener(commands.Cog):
             and not message.webhook_id
         ):
             return
+        # ————————————————————————————————
+        # ⚡ Pokemon Timer
+        # ————————————————————————————————
+        if message.embeds and message.embeds[0]:
+            embed = message.embeds[0]
+            embed_description = embed.description if embed else None
+            if embed_description and "found a wild" in embed_description:
+                await detect_pokemeow_reply(message)
+
+        # ————————————————————————————————
+        # ⚡ Fish Timer
+        # ————————————————————————————————
+        if message.embeds and message.embeds[0]:
+            embed = message.embeds[0]
+            embed_description = embed.description if embed else None
+            if (
+                embed_description
+                and "cast a" in embed_description
+                and "into the water" in embed_description
+            ):
+                await fish_timer_handler(message)
+
+        # ————————————————————————————————
+        # ⚡ Battle Timer
+        # ————————————————————————————————
+        if first_embed_author and "PokeMeow Battles" in first_embed_author:
+            await detect_pokemeow_battle(bot=self.bot, message=message)
+
         # ————————————————————————————————
         # ⚡ Faction Ball Alert
         # ————————————————————————————————
@@ -242,8 +272,12 @@ class MessageCreateListener(commands.Cog):
             first_embed_description
             and "<:held_item:" in first_embed_description
         ):
+            pretty_log(
+                "info",
+                f"Detected potential held item spawn in message {message.id}, processing for held item pings...",
+            )
             await held_item_ping_handler(self.bot, message)
-            
+
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────

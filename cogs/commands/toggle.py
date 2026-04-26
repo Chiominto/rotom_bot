@@ -45,6 +45,27 @@ class ToggleGroup(commands.Cog):
 
     toggle_alerts.extras = {"category": "Public"}
 
+    # 🟣────────────────────────────────────────────
+    #     💜 /toggle timers
+    # 🟣────────────────────────────────────────────
+    @toggle_group.command(
+        name="timers",
+        description="Modifies your timers' settings",
+    )
+    async def toggle_timers(
+        self,
+        interaction: discord.Interaction,
+    ):
+        slash_cmd_name = "toggle timers"
+
+        await run_command_safe(
+            bot=self.bot,
+            interaction=interaction,
+            slash_cmd_name=slash_cmd_name,
+            command_func=timer_settings_func,
+        )
+    toggle_timers.extras = {"category": "Public"}
+
 
 # 🟣────────────────────────────────────────────
 #           💜 Cog Setup Function 💜

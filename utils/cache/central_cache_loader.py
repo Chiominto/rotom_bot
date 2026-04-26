@@ -12,6 +12,8 @@ from .faction_cache import load_faction_cache
 from .ev_tracker_cache import load_ev_tracker_cache
 from .egg_alert_cache import load_egg_alert_cache
 from .celestial_members_cache import load_celestial_members_cache
+from .timers_cache import load_timer_cache
+
 async def load_all_cache(bot: discord.Client):
     """
     Loads all caches used by the bot.
@@ -26,7 +28,10 @@ async def load_all_cache(bot: discord.Client):
 
         # Load Celestial Members Cache
         await load_celestial_members_cache(bot)
-        
+
+        # Load Timer Settings Cache
+        await load_timer_cache(bot)
+
         # Load Faction Cache
         await load_faction_cache(bot)
 

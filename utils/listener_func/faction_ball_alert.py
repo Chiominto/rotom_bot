@@ -18,7 +18,7 @@ from utils.functions.get_pokemeow_reply import get_pokemeow_reply
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-# enable_debug(f"{__name__}.faction_ball_alert")
+enable_debug(f"{__name__}.faction_ball_alert")
 FISHING_COLOR = 0x87CEFA
 
 
@@ -31,6 +31,27 @@ def extract_trainer_name_from_description(description: str) -> str | None:
     match = re.search(r"\*\*(.+?)\*\*\s+found a wild", description)
     if match:
         return match.group(1).strip()
+    return None
+
+
+def extract_member_username_from_embed(embed: discord.Embed) -> str | None:
+    """
+    Extracts the username from the embed author name, e.g. "Congratulations, frayl!" -> "frayl".
+    Returns None if not found.
+    """
+    if embed.author and embed.author.name:
+        # Try 'Congratulations, username!' first
+        match = re.search(r"Congratulations, ([^!]+)!", embed.author.name)
+        if match:
+            return match.group(1).strip()
+        # Fallback: 'Well done, username!'
+        match = re.search(r"Well done, ([^!]+)!", embed.author.name)
+        if match:
+            return match.group(1).strip()
+        # Fallback: 'Great work, username!'
+        match = re.search(r"Great work, ([^!]+)!", embed.author.name)
+        if match:
+            return match.group(1).strip()
     return None
 
 
@@ -139,6 +160,11 @@ async def faction_ball_alert(
             elif embed_color and embed_color.value != FISHING_COLOR:
                 debug_log("No member found, using fallback")
                 trainer_name = extract_trainer_name_from_description(description_text)
+                if trainer_name is None:
+                    trainer_name = extract_member_username_from_embed(after.embeds[0])
+                    debug_log(
+                        f"Description fallback failed, extracted trainer name from embed author: {trainer_name}"
+                    )
                 debug_log(f"Fallback extracted trainer name: {trainer_name}")
 
                 user_id = get_user_id_by_name(trainer_name) if trainer_name else None
@@ -178,46 +204,80 @@ async def faction_ball_alert(
 
         user_faction_ball_alert = faction_ball_alert_cache.get(user_id)
         debug_log(f"User faction ball alert settings: {user_faction_ball_alert}")
-        # Upsert
-        await upsert_user_faction_ball_alert_via_user_id(
-            bot=bot,
-            user_id=user_id,
-            user_name=member.name if member else trainer_name,
-            notify="on_no_pings",
-        )
-        debug_log(
-            "Upserted default faction ball alert settings for user in database and cache"
-        )
 
         if not user_faction_ball_alert:
-            debug_log("No faction ball alert settings for user, returning early")
-            # try using fishing trainer_id if available
-            if trainer_name:
-                user_id = get_user_id_by_name(trainer_name)
-                if user_id:
-                    debug_log(f"Fetched user ID from straymon cache by name: {user_id}")
-                    user_faction_ball_alert = faction_ball_alert_cache.get(user_id)
+            # Only upsert when we have a valid user_id
+            if user_id is not None:
+                await upsert_user_faction_ball_alert_via_user_id(
+                    bot=bot,
+                    user_id=user_id,
+                    user_name=member.name if member else trainer_name,
+                    notify="on_no_pings",
+                )
+                debug_log(
+                    "No existing settings found — upserted default faction ball alert settings for user"
+                )
+                user_faction_ball_alert = faction_ball_alert_cache.get(user_id)
+                debug_log(
+                    f"Re-fetched user faction ball alert after upsert: {user_faction_ball_alert}"
+                )
+            else:
+                debug_log("No user_id available yet, skipping initial upsert")
+
+            # Still nothing — try fallback via trainer_name
+            if not user_faction_ball_alert:
+                if trainer_name:
+                    user_id = get_user_id_by_name(trainer_name)
                     if user_id:
+                        debug_log(
+                            f"Fetched user ID from cache by trainer name: {user_id}"
+                        )
+                        user_faction_ball_alert = faction_ball_alert_cache.get(user_id)
                         fishing_user = after.guild.get_member(user_id)
                         debug_log(f"Fetched fishing user from guild: {fishing_user}")
+
+                        # If fallback resolved user_id but settings still missing, create defaults now.
+                        if not user_faction_ball_alert:
+                            await upsert_user_faction_ball_alert_via_user_id(
+                                bot=bot,
+                                user_id=user_id,
+                                user_name=(
+                                    member.name
+                                    if member
+                                    else (
+                                        fishing_user.name
+                                        if fishing_user
+                                        else trainer_name
+                                    )
+                                ),
+                                notify="on_no_pings",
+                            )
+                            debug_log(
+                                "Fallback resolved user_id — upserted default faction ball alert settings"
+                            )
+                            user_faction_ball_alert = faction_ball_alert_cache.get(
+                                user_id
+                            )
+                            debug_log(
+                                f"Re-fetched user faction ball alert after fallback upsert: {user_faction_ball_alert}"
+                            )
+                    else:
+                        user_id = None
+                        debug_log("No user ID found in cache, returning early")
+                        content = f"{trainer_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
+                        await after.channel.send(content=content)
+                        return
+
+                    if not user_faction_ball_alert:
+                        debug_log(
+                            "[EXIT-C] No settings after fallback lookup, returning early"
+                        )
+                        return
                 else:
-                    user_id = None
-                    debug_log("No user ID found in cache, returning early")
+                    debug_log("No trainer name available for fallback, returning early")
                     content = f"{trainer_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
                     await after.channel.send(content=content)
                     return
-
-                if not user_faction_ball_alert:
-                    debug_log(
-                        "[EXIT-C] No settings for fishing trainer ID, returning early after fallback lookup"
-                    )
-                    return
-            else:
-                debug_log("No trainer name available for fallback, returning early")
-
-                content = f"{trainer_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
-                await after.channel.send(content=content)
-                return
 
         user_faction_ball_notify = user_faction_ball_alert.get("notify")
         debug_log(f"User faction ball notify setting: {user_faction_ball_notify}")
