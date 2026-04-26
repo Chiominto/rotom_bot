@@ -193,8 +193,6 @@ async def faction_ball_alert(
             debug_log("No faction ball alert settings for user, returning early")
             # try using fishing trainer_id if available
             if trainer_name:
-                from utils.cache.faction_cache import get_user_id_by_name
-
                 user_id = get_user_id_by_name(trainer_name)
                 if user_id:
                     debug_log(f"Fetched user ID from straymon cache by name: {user_id}")
@@ -252,6 +250,7 @@ async def faction_ball_alert(
             await after.channel.send(content=content)
             return
         from utils.cache.daily_fa_ball_cache import get_faction_ball
+
         faction_ball = get_faction_ball(user_faction)
         debug_log(f"Faction daily ball: {faction_ball}")
         if not faction_ball:
