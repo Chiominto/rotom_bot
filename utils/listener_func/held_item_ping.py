@@ -4,10 +4,12 @@ import discord
 from discord.ext import commands
 
 from constants.held_items import held_item_message
+from utils.functions.get_pokemeow_reply import get_pokemeow_reply
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
-from utils.functions.get_pokemeow_reply import get_pokemeow_reply
-from .faction_ball_alert import extract_member_username_from_embed, get_user_id_by_name
+
+from .faction_ball_alert import (extract_member_username_from_embed,
+                                 get_user_id_by_name)
 
 enable_debug(f"{__name__}.held_item_ping_handler")
 
@@ -20,13 +22,16 @@ async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
     from utils.cache.item_alert_cache import fetch_user_item_alert_cache
 
     target_user = await get_pokemeow_reply(message)
+    embed_description = message.embeds[0].description if message.embeds else "No embeds"
     if not target_user:
         # Fallback try to extract username from embed author if possible
-        trainer_name = re.search(r"\*\*(.+?)\*\* found a wild", message.content)
-        if not trainer_name:
+        trainer_match = re.search(r"\*\*(.+?)\*\* found a wild", embed_description)
+        if not trainer_match:
             debug_log("No username match found in message content.")
             return
-        
+
+        trainer_name = trainer_match.group(1)
+
         # If we got a trainer name from the embed, we can try to find the user ID from the name
         target_user_id = get_user_id_by_name(trainer_name)
         if not target_user_id:
