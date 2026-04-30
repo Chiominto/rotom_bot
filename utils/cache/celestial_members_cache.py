@@ -21,7 +21,7 @@ async def load_celestial_members_cache(bot: discord.Client):
         user_id = row["user_id"]
         celestial_members_cache[user_id] = {
             "user_name": row["user_name"],
-            "pokemon_name": row["pokemon_name"],
+            "pokemeow_name": row["pokemeow_name"],
             "channel_id": row["channel_id"],
             "actual_perks": row["actual_perks"],
             "clan_bank_donation": row["clan_bank_donation"],
@@ -50,10 +50,10 @@ def fetch_user_id_by_channel_id_cache(channel_id: int):
             return user_id
     return None
 
-def fetch_user_id_by_pokemon_name_cache(pokemon_name: str):
+def fetch_user_id_by_pokemeow_name_cache(pokemeow_name: str):
     """Fetches a user ID from the cache based on pokemeow name."""
     for user_id, data in celestial_members_cache.items():
-        if data["pokemon_name"] == pokemon_name:
+        if data["pokemeow_name"] == pokemeow_name:
             return user_id
     return None
 
@@ -64,20 +64,20 @@ def fetch_user_id_by_user_name_cache(user_name: str):
             return user_id
     return None
 
-def fetch_user_id_by_user_name_or_pokemon_name_cache(name: str):
+def fetch_user_id_by_user_name_or_pokemeow_name_cache(name: str):
     """Fetches a user ID from the cache based on user name or pokemeow name."""
     for user_id, data in celestial_members_cache.items():
-        if data["user_name"] == name or data["pokemon_name"] == name:
+        if data["user_name"] == name or data["pokemeow_name"] == name:
             return user_id
     return None
 
 
 
-def upsert_celestial_member_cache(user_id: int, user_name: str, pokemon_name: str, channel_id: int, actual_perks: str, clan_bank_donation: int, clan_treasury_donation: int, date_joined: int):
+def upsert_celestial_member_cache(user_id: int, user_name: str, pokemeow_name: str, channel_id: int, actual_perks: str, clan_bank_donation: int, clan_treasury_donation: int, date_joined: int):
     """Upserts a celestial member into the cache."""
     celestial_members_cache[user_id] = {
         "user_name": user_name,
-        "pokemon_name": pokemon_name,
+        "pokemeow_name": pokemeow_name,
         "channel_id": channel_id,
         "actual_perks": actual_perks,
         "clan_bank_donation": clan_bank_donation,
@@ -92,10 +92,10 @@ def update_actual_perks_cache(user_id: int, actual_perks: str):
         return True
     return False
 
-def update_pokemeow_name_cache(user_id: int, pokemon_name: str):
+def update_pokemeow_name_cache(user_id: int, pokemeow_name: str):
     """Updates the pokemeow name of a celestial member in the cache."""
     if user_id in celestial_members_cache:
-        celestial_members_cache[user_id]["pokemon_name"] = pokemon_name
+        celestial_members_cache[user_id]["pokemeow_name"] = pokemeow_name
         return True
     return False
 
