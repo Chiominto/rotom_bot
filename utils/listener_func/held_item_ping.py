@@ -8,8 +8,7 @@ from utils.functions.get_pokemeow_reply import get_pokemeow_reply
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-from .faction_ball_alert import (extract_member_username_from_embed,
-                                 get_user_id_by_name)
+from .faction_ball_alert import extract_member_username_from_embed, get_user_id_by_name
 
 enable_debug(f"{__name__}.held_item_ping_handler")
 
@@ -19,7 +18,11 @@ async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
     Scan message embeds for Pokemon spawns.
     Logs all Pokemon, but only pings if spawn has a held item AND user is subscribed.
     """
-    from utils.cache.item_alert_cache import fetch_user_item_alert_cache
+    from utils.cache.item_alert_cache import (
+        fetch_user_item_alert_cache,
+        upsert_item_alert_cache_via_user_id,
+    )
+    from utils.db.item_alert_db_func import fetch_user_item_alert
 
     target_user = await get_pokemeow_reply(message)
     embed_description = message.embeds[0].description if message.embeds else "No embeds"
@@ -30,7 +33,7 @@ async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
             debug_log("No username match found in message content.")
             return
 
-        trainer_name = trainer_match.group(1)
+        trainer_name = trainer_match.group(1).strip()
 
         # If we got a trainer name from the embed, we can try to find the user ID from the name
         target_user_id = get_user_id_by_name(trainer_name)
@@ -48,6 +51,20 @@ async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
 
     # Get user subscription from cache
     user_item_alert = fetch_user_item_alert_cache(target_user.id)
+    if not user_item_alert:
+        # Cache can be stale/missing; fallback to DB and repopulate cache for future lookups.
+        user_item_alert_row = await fetch_user_item_alert(bot, target_user.id)
+        if user_item_alert_row:
+            user_item_alert = {
+                "user_name": user_item_alert_row.get("user_name"),
+                "notify": user_item_alert_row.get("notify"),
+            }
+            upsert_item_alert_cache_via_user_id(
+                user_id=target_user.id,
+                user_name=user_item_alert.get("user_name") or target_user.name,
+                notify=user_item_alert.get("notify") or "on_no_pings",
+            )
+
     # Return of None or "off"
     if not user_item_alert or user_item_alert.get("notify") == "off":
         debug_log(
@@ -94,7 +111,7 @@ async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
 
             try:
                 mention_str = f"<@{target_user.id}>"
-                if user_item_alert == "on_no_pings":
+                if user_item_alert.get("notify") == "on_no_pings":
                     mention_str = f"**{target_user.name}**"
                 await message.channel.send(f"{mention_str} {msg}")
                 debug_log(f"Sent held item ping to {target_user.id} for {pokemon_name}")

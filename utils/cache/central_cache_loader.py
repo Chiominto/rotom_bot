@@ -5,14 +5,16 @@ from utils.logs.pretty_log import pretty_log
 from .pokemon_cache import load_pokemon_cache
 
 from .webhook_url_cache import load_webhook_url_cache
-from .daily_fa_ball_cache  import load_daily_faction_ball_cache
+from .daily_fa_ball_cache import load_daily_faction_ball_cache
 from .faction_ball_alert_cache import load_faction_ball_alert_cache
 from .wb_battle_alert_cache import load_wb_battle_alert_cache
 from .faction_cache import load_faction_cache
 from .ev_tracker_cache import load_ev_tracker_cache
 from .egg_alert_cache import load_egg_alert_cache
+from .item_alert_cache import load_item_alert_cache
 from .celestial_members_cache import load_celestial_members_cache
 from .timers_cache import load_timer_cache
+
 
 async def load_all_cache(bot: discord.Client):
     """
@@ -49,6 +51,9 @@ async def load_all_cache(bot: discord.Client):
 
         # Egg Alert Cache
         await load_egg_alert_cache(bot)
+
+        # Item Alert Cache
+        await load_item_alert_cache(bot)
 
     except Exception as e:
         pretty_log(
