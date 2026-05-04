@@ -2,11 +2,9 @@ import re
 
 import discord
 
-from constants.celestial_constants import CELESTIALS_SERVER_ID
-from constants.faction_data import FACTION_LOGO_EMOJIS, get_faction_by_emoji
+from constants.faction_data import get_faction_by_emoji
 from utils.cache.cache_list import faction_cache
 from utils.cache.daily_fa_ball_cache import daily_faction_ball_cache
-from utils.cache.faction_ball_alert_cache import faction_ball_alert_cache
 from utils.db.daily_fa_ball import update_faction_ball
 from utils.db.faction_db import upsert_faction
 from utils.functions.get_pokemeow_reply import get_pokemeow_reply
@@ -15,6 +13,7 @@ from utils.logs.pretty_log import pretty_log
 
 # enable_debug(f"{__name__}.extract_faction_ball_from_daily")
 # enable_debug(f"{__name__}.extract_faction_ball_from_fa")
+
 
 # 🛡️────────────────────────────────────────────
 #      🛡️ Faction Ball Listener Functions
@@ -49,11 +48,16 @@ async def extract_faction_ball_from_daily(bot, message: discord.Message):
 
     faction_team_emoji = match.group(1)
     daily_ball_emoji = match.group(2)
-    daily_ball = match.group(3)
+    daily_ball_name_match = re.search(r"<:([a-zA-Z0-9_]+):\d+>", daily_ball_emoji)
+    daily_ball = (
+        daily_ball_name_match.group(1).lower() if daily_ball_name_match else None
+    )
     debug_log(
         f"Matched faction_team_emoji: {faction_team_emoji}, daily_ball_emoji: {daily_ball_emoji}, daily_ball: {daily_ball}"
     )
-    daily_ball = daily_ball.lower()
+    if not daily_ball:
+        debug_log("Could not extract ball name from emoji.")
+        return
     pretty_log(
         "info",
         f"Extracted faction ball from daily message in {message.channel.name}: Faction Emoji: {faction_team_emoji}, Ball: {daily_ball}",
@@ -93,8 +97,12 @@ async def extract_faction_ball_from_daily(bot, message: discord.Message):
     debug_log(f"Cached member for user_id {user_id}: {cached_member}")
     if not cached_member:
         # Upsert user with faction
-        debug_log(f"No cached member found for user {user_id}. Upserting with faction {faction}.")
-        await upsert_faction(bot=bot, user_id=user_id, user_name=user_name, faction=faction)
+        debug_log(
+            f"No cached member found for user {user_id}. Upserting with faction {faction}."
+        )
+        await upsert_faction(
+            bot=bot, user_id=user_id, user_name=user_name, faction=faction
+        )
         return
 
     existing_user_faction = cached_member.get("faction")
@@ -124,7 +132,6 @@ async def extract_faction_ball_from_fa(bot, message: discord.Message):
         debug_log("No embed present in message.")
         return
 
-    faction = None
     if not embed.author or not embed.author.name:
         debug_log("Embed has no author or author name.")
         return
@@ -148,32 +155,29 @@ async def extract_faction_ball_from_fa(bot, message: discord.Message):
     # Check if there is already a ball for that faction
     daily_ball_faction = daily_faction_ball_cache.get(faction)
     debug_log(f"Cache lookup for faction {faction}: {daily_ball_faction}")
-    if daily_ball_faction:
-        debug_log("Faction already has a cached daily ball. No update needed.")
-        return
+    if not daily_ball_faction:
+        # Extract ball from embed description
+        if not embed.description:
+            debug_log("No description found in embed.")
+            return
 
-    # Extract ball from embed description
-    if not embed.description:
-        debug_log("No description found in embed.")
-        return
+        debug_log(f"Embed description: {embed.description}")
+        ball_match = re.search(
+            r"<:([a-zA-Z0-9_]+):\d+>\s+\*\*Today's target Pokemon are\*\*",
+            embed.description,
+        )
+        debug_log(f"Ball regex match: {ball_match}")
+        if not ball_match:
+            debug_log("Could not parse ball emoji from embed description.")
+            return
 
-    debug_log(f"Embed description: {embed.description}")
-    ball_match = re.search(
-        r"<:([a-zA-Z0-9_]+):\d+>\s+\*\*Today's target Pokemon are\*\*",
-        embed.description,
-    )
-    debug_log(f"Ball regex match: {ball_match}")
-    if not ball_match:
-        debug_log("Could not parse ball emoji from embed description.")
-        return
+        daily_ball = ball_match.group(1)
+        debug_log(f"Extracted daily ball: {daily_ball}")
 
-    daily_ball = ball_match.group(1)
-    debug_log(f"Extracted daily ball: {daily_ball}")
-
-    # Update db and cache
-    if daily_ball:
-        debug_log(f"Updating faction ball in DB/cache: {faction} -> {daily_ball}")
-        await update_faction_ball(bot, faction, daily_ball)
+        # Update db and cache
+        if daily_ball:
+            debug_log(f"Updating faction ball in DB/cache: {faction} -> {daily_ball}")
+            await update_faction_ball(bot, faction, daily_ball)
 
     # Check if member has a faction
     user_id = member.id
