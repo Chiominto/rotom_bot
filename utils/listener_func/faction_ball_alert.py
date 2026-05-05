@@ -15,6 +15,7 @@ from utils.db.faction_ball_alert_db_func import (
     upsert_user_faction_ball_alert_via_user_id,
 )
 from utils.functions.get_pokemeow_reply import get_pokemeow_reply
+from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
@@ -265,7 +266,7 @@ async def faction_ball_alert(
                         user_id = None
                         debug_log("No user ID found in cache, returning early")
                         content = f"{trainer_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
-                        await after.channel.send(content=content)
+                        await _retry_discord_call(after.channel.send, content=content)
                         return
 
                     if not user_faction_ball_alert:
@@ -276,7 +277,7 @@ async def faction_ball_alert(
                 else:
                     debug_log("No trainer name available for fallback, returning early")
                     content = f"{trainer_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
-                    await after.channel.send(content=content)
+                    await _retry_discord_call(after.channel.send, content=content)
                     return
 
         user_faction_ball_notify = user_faction_ball_alert.get("notify")
@@ -307,7 +308,7 @@ async def faction_ball_alert(
         if not user_faction:
             debug_log("User has no faction set, returning early")
             content = f"{user_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
-            await after.channel.send(content=content)
+            await _retry_discord_call(after.channel.send, content=content)
             return
         from utils.cache.daily_fa_ball_cache import get_faction_ball
 
@@ -315,7 +316,7 @@ async def faction_ball_alert(
         debug_log(f"Faction daily ball: {faction_ball}")
         if not faction_ball:
             content = f"{user_mention} I don't know your faction's daily ball yet, can you do `;fa`? Thanks!."
-            await after.channel.send(content=content)
+            await _retry_discord_call(after.channel.send, content=content)
             pretty_log(
                 "info",
                 f"Could not send faction ball alert to {user_name} ({user_id}) for {embed_faction} daily ball because their faction {user_faction} has no daily ball set.",
@@ -330,7 +331,7 @@ async def faction_ball_alert(
         if ball_emoji:
             if user_faction_ball_notify == "on":
                 content = f"<@{user_id}>, This Pokemon is a daily {display_embed_faction} hunt! Use {ball_emoji}!"
-                await after.channel.send(content)
+                await _retry_discord_call(after.channel.send, content)
                 pretty_log(
                     "sent",
                     f"Sent faction ball alert to {user_name} ({user_id}) for {embed_faction} daily ball {faction_ball}",
@@ -338,7 +339,7 @@ async def faction_ball_alert(
                 debug_log("Sent faction ball alert with ping")
             elif user_faction_ball_notify == "on_no_pings":
                 content = f"**{user_name}**, This Pokemon is a daily {display_embed_faction} hunt! Use {ball_emoji}!"
-                await after.channel.send(content)
+                await _retry_discord_call(after.channel.send, content)
                 pretty_log(
                     "sent",
                     f"Sent faction ball alert (no ping) to {user_name} ({user_id}) for {embed_faction} daily ball {faction_ball}",
@@ -346,7 +347,7 @@ async def faction_ball_alert(
                 debug_log("Sent faction ball alert without ping")
             elif user_faction_ball_notify == "react":
                 try:
-                    await after.add_reaction(ball_emoji)
+                    await _retry_discord_call(after.add_reaction, ball_emoji)
                     debug_log("Added ball emoji reaction")
                 except Exception as e:
                     pretty_log("error", f"Failed to add reaction {ball_emoji}: {e}")
