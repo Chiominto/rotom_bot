@@ -4,7 +4,7 @@ import discord
 from discord import ButtonStyle
 from discord.ext import commands
 
-
+from constants.aesthetics import *
 from utils.db.timers_db import (
     fetch_timer,
     update_battle_setting,
@@ -14,10 +14,9 @@ from utils.db.timers_db import (
 )
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
-from constants.aesthetics import *
-enable_debug(f"{__name__}.timer_settings_func")
-enable_debug(f"{__name__}.TimerSettingsView")
 
+# enable_debug(f"{__name__}.timer_settings_func")
+# enable_debug(f"{__name__}.TimerSettingsView")
 
 
 # 💗────────────────────────────────────────────
@@ -200,7 +199,9 @@ class TimerSettingsView(discord.ui.View):
     #  💫────────────────────────────────────
     # [🎣 Button] Fish Timer (3 State Cycle)
     #  💫────────────────────────────────────
-    @discord.ui.button(label="Fish: Off", style=ButtonStyle.secondary, emoji=FISH_TIMER_EMOJI)
+    @discord.ui.button(
+        label="Fish: Off", style=ButtonStyle.secondary, emoji=FISH_TIMER_EMOJI
+    )
     async def fish_button(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):
@@ -269,7 +270,9 @@ class TimerSettingsView(discord.ui.View):
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     # [🧩 Button] Battle Timer (3 State Cycle)
     # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    @discord.ui.button(label="Battle: Off", style=ButtonStyle.secondary, emoji=BATTLE_TIMER_EMOJI)
+    @discord.ui.button(
+        label="Battle: Off", style=ButtonStyle.secondary, emoji=BATTLE_TIMER_EMOJI
+    )
     async def battle_button(
         self, interaction: discord.Interaction, button: discord.ui.Button
     ):

@@ -14,7 +14,8 @@ from .egg_alert_cache import load_egg_alert_cache
 from .item_alert_cache import load_item_alert_cache
 from .celestial_members_cache import load_celestial_members_cache
 from .timers_cache import load_timer_cache
-
+from .utilities_cache import load_utility_cache
+from .research_fossil_alert_cache import load_research_fossil_alert_cache
 
 async def load_all_cache(bot: discord.Client):
     """
@@ -54,6 +55,18 @@ async def load_all_cache(bot: discord.Client):
 
         # Item Alert Cache
         await load_item_alert_cache(bot)
+
+        # Load Research Fossil Alert Cache
+        await load_research_fossil_alert_cache(bot)
+
+        # Load Utility Cache
+        try:
+            await load_utility_cache(bot)
+        except Exception as util_e:
+            pretty_log(
+                message=f"⚠️ Utility cache failed to load: {util_e}",
+                tag="cache",
+            )
 
     except Exception as e:
         pretty_log(

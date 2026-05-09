@@ -66,6 +66,27 @@ class ToggleGroup(commands.Cog):
         )
     toggle_timers.extras = {"category": "Public"}
 
+    # 🟣────────────────────────────────────────────
+    #     💜 /toggle utilities
+    # 🟣────────────────────────────────────────────
+    @toggle_group.command(
+        name="utilities",
+        description="Modifies your utilities' settings",
+    )
+    async def toggle_utilities(
+        self,
+        interaction: discord.Interaction,
+    ):
+        slash_cmd_name = "toggle utilities"
+
+        await run_command_safe(
+            bot=self.bot,
+            interaction=interaction,
+            slash_cmd_name=slash_cmd_name,
+            command_func=utilities_settings_func,
+        )
+    toggle_utilities.extras = {"category": "Public"}
+
 
 # 🟣────────────────────────────────────────────
 #           💜 Cog Setup Function 💜

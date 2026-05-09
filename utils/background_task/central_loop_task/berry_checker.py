@@ -1,8 +1,9 @@
 import time
 
 import discord
-from constants.celestial_constants import *
+
 from constants.aesthetics import *
+from constants.celestial_constants import *
 from utils.db.berry_reminder import (
     berry_map,
     fetch_all_due_berry_reminders,
@@ -13,8 +14,7 @@ from utils.db.berry_reminder import (
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-
-enable_debug(f"{__name__}.berry_reminder_checker")
+# enable_debug(f"{__name__}.berry_reminder_checker")
 
 
 async def update_growth_stage_func(
@@ -158,9 +158,7 @@ async def berry_reminder_checker(bot: discord.Client):
                             f"Growth paused for slot {slot_number}, removing reminder."
                         )
 
-            berry_name = (
-                f"- {berry_name_raw.title()} (Slot {slot_number})".strip()
-            )
+            berry_name = f"- {berry_name_raw.title()} (Slot {slot_number})".strip()
             debug_log(
                 f"Prepared berry name: {berry_name} (raw: {berry_name_raw}) for context: {context}"
             )

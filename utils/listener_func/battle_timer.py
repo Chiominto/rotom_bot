@@ -1,10 +1,10 @@
 import asyncio
 import re
 from typing import Optional
-
+from utils.db.utilities_db import upsert_utility_setting
 import discord
 from discord.ext import commands
-
+from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache
 from constants.aesthetics import *
 from constants.celestial_constants import POKEMEOW_APPLICATION_ID, DEFAULT_EMBED_COLOR
 from utils.cache.cache_list import (
@@ -13,7 +13,7 @@ from utils.cache.cache_list import (
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 from utils.functions.retry_function import _retry_discord_call
-
+from .pokemon_caught_listener import phone_copy_description
 battle_ready_tasks = {}
 FOLLOWUP_REJECT_LOG_COOLDOWN_SECONDS = 10.0
 followup_reject_log_cache: dict[str, float] = {}
@@ -335,6 +335,7 @@ def _build_battle_command(enemy_id: Optional[str]) -> str:
 
 
 async def _send_battle_ready_notification(
+    bot: commands.Bot,
     message: discord.Message,
     challenger: discord.Member,
     setting: str,
@@ -344,7 +345,10 @@ async def _send_battle_ready_notification(
         debug_log("Sending battle-ready notice via reaction")
         await message.add_reaction(Emojis.gray_check)
         return
-
+    phone_setting = (
+        fetch_user_utility_type_setting_cache(challenger.id, "phone") or "iphone"
+    )
+    battle_command = phone_copy_description(battle_command, phone_setting)
     battle_embed = discord.Embed(color=DEFAULT_EMBED_COLOR)
     battle_embed.description = battle_command
 
@@ -354,6 +358,17 @@ async def _send_battle_ready_notification(
             content=f"{BATTLE_TIMER_EMOJI} {challenger.mention}, your </battle:1015311084422434819> command is ready!",
             embed=battle_embed,
         )
+                    # Upsert phone setting to db if there is no entry yet and set it to iphone by default
+        if fetch_user_utility_type_setting_cache(challenger.id, "phone") is None:
+            await upsert_utility_setting(
+                bot, challenger.id, challenger.name, "phone", "iphone"
+            )
+            pretty_log(
+                "info",
+                f"Upserted default phone setting for {challenger.name} ({challenger.id}) in Research Fossil Alert flow",
+                label="🦴 RESEARCH FOSSILS ALERT",
+                bot=bot,
+            )
         return
 
     if setting in {"on w/o pings", "on_no_pings"}:
@@ -467,6 +482,7 @@ async def detect_pokemeow_battle(bot: commands.Bot, message: discord.Message):
                 battle_command = _build_battle_command(enemy_id_holder["id"])
                 debug_log(f"Battle-ready command resolved: {battle_command}")
                 await _send_battle_ready_notification(
+                    bot=bot,
                     message=message,
                     challenger=challenger,
                     setting=setting,

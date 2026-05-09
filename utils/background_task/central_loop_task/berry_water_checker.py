@@ -2,21 +2,20 @@ import time
 
 import discord
 
-from constants.celestial_constants import *
 from constants.aesthetics import *
+from constants.celestial_constants import *
 from utils.db.berry_reminder import (
     berry_map,
     fetch_all_due_berry_reminders,
+    fetch_all_due_moisture_dries_on,
     next_stage_map,
     remove_berry_reminder,
     update_growth_stage,
-    fetch_all_due_moisture_dries_on
 )
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-
-enable_debug(f"{__name__}.berry_reminder_checker")
+# enable_debug(f"{__name__}.berry_reminder_checker")
 
 
 async def update_growth_stage_func(
@@ -112,23 +111,16 @@ async def berry_water_reminder(bot: discord.Client):
                 else "unknown"
             )
             slot_number = reminder["slot_number"]
-            #berry_emoji = berry_map[berry_name_raw]["emoji"]
+            # berry_emoji = berry_map[berry_name_raw]["emoji"]
             debug_log(
                 f"water_can_type={water_can_type}, stage={stage}, next_stage={next_stage}, mulch_type={mulch_type}, slot_number={slot_number}, berry_name_raw={berry_name_raw}"
             )
 
-            berry_name = (
-                f"- {berry_name_raw.title()} (Slot {slot_number})".strip()
-            )
-            debug_log(
-                f"Prepared berry name: {berry_name} (raw: {berry_name_raw})"
-            )
+            berry_name = f"- {berry_name_raw.title()} (Slot {slot_number})".strip()
+            debug_log(f"Prepared berry name: {berry_name} (raw: {berry_name_raw})")
 
             to_be_watered_berry_names.append(berry_name)
-            debug_log(
-                f"Added to watering list: {berry_name} for slot {slot_number}"
-            )
-
+            debug_log(f"Added to watering list: {berry_name} for slot {slot_number}")
 
         to_be_watered_field_name = (
             "Berries to be watered. Use `;berry water` to water them:"
@@ -181,7 +173,6 @@ async def berry_water_reminder(bot: discord.Client):
                     await remove_berry_reminder(
                         bot, user_id, slot_number=reminder["slot_number"]
                     )
-
 
             except Exception as e:
                 pretty_log(

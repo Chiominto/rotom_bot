@@ -104,6 +104,27 @@ class Thumbnails:
     drought = "https://media.discordapp.net/attachments/1394913073520967680/1493054165981859900/image.png?ex=69dd928c&is=69dc410c&hm=477948b20ba944a9b1c12f0d3697b6813344e33efa0b9b3104657e95b96d99d5&=&format=webp&quality=lossless&width=450&height=450"
 
 
+class TYPE_EMOJI:
+    dark = "<:darktype:1229731181508034641>"
+    dragon = "<:dragontype:1229731185433776159>"
+    electric = "<:electrictype:1229731190530117702>"
+    fairy = "<:fairytype:1229731195235864596>"
+    flying = "<:flyingtype:1229731199573037160>"
+    fire = "<:firetype:1229731203922526289>"
+    ground = "<:groundtype:1229731207911313428>"
+    ice = "<:icetype:1229731213242011690>"
+    grass = "<:grasstype:1229731217830576158>"
+    steel = "<:steeltype:1229731223186964480>"
+    bug = "<:bugtype:1229731227133546567>"
+    water = "<:watertype:1229731232120701018>"
+    poison = "<:poisontype:1229731235849441321>"
+    psychic = "<:psychictype:1229731241377402930>"
+    fighting = "<:fightingtype:1229731245823492167>"
+    ghost = "<:ghosttype:1229731249950556191>"
+    normal = "<:normaltype:1229731254845575178>"
+    rock = "<:rocktype:1229731259295465522>"
+
+
 POKEMON_TIMER_EMOJI = Emojis.Voltorb
 BATTLE_TIMER_EMOJI = Emojis.Shuckle
 FISH_TIMER_EMOJI = Emojis.Wooper

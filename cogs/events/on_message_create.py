@@ -26,6 +26,7 @@ from utils.listener_func.held_item_ping import held_item_ping_handler
 from utils.listener_func.pokemon_timer import detect_pokemeow_reply
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.battle_timer import detect_pokemeow_battle
+from utils.listener_func.battle_weakness import weakness_chart
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 
 triggers = {"bud_info_trigger": "**Level**:", "ev_training": "won the battle"}
@@ -277,6 +278,22 @@ class MessageCreateListener(commands.Cog):
                 f"Detected potential held item spawn in message {message.id}, processing for held item pings...",
             )
             await held_item_ping_handler(self.bot, message)
+        # ————————————————————————————————
+        # ⚡ Battle Weakness Chart Listener
+        # ————————————————————————————————
+        if message.embeds and message.embeds[0]:
+            if (
+                ":crossed_swords" in first_embed_title
+                and "sent out" in first_embed_description
+            ):
+                try:
+                    await weakness_chart(bot=self.bot, message=message)
+                except Exception as bw_e:
+                    pretty_log(
+                        "error",
+                        f"Battle weakness processing failed for message {message.id} in {message.channel.name}: {bw_e}",
+                        source="weakness_chart",
+                    )
 
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function

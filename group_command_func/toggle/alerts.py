@@ -2,23 +2,23 @@ import discord
 from discord import ButtonStyle
 from discord.ext import commands
 
+from constants.aesthetics import Emojis
+from constants.celestial_constants import CELESTIAL_EMOJIS
+from utils.db.egg_alert_db_func import fetch_user_egg_alert, upsert_user_egg_alert
 from utils.db.faction_ball_alert_db_func import (
     fetch_user_faction_ball_alert,
     upsert_user_faction_ball_alert,
 )
-from utils.db.egg_alert_db_func import (
-    fetch_user_egg_alert,
-    upsert_user_egg_alert,
-)
-from utils.db.item_alert_db_func import (
-    upsert_user_item_alert,
-    fetch_user_item_alert,
+from utils.db.item_alert_db_func import fetch_user_item_alert, upsert_user_item_alert
+from utils.db.research_fossil_alert_db_func import (
+    fetch_user_research_fossil_alert,
+    upsert_user_research_fossil_alert,
 )
 from utils.db.wb_fight_db import fetch_user_wb_battle_alert, upsert_user_wb_battle_alert
 from utils.functions.safe_response import safe_respond
 from utils.logs.pretty_log import pretty_log
-from constants.celestial_constants import CELESTIAL_EMOJIS
-from constants.aesthetics import Emojis
+
+
 # 💗────────────────────────────────────────────
 # [🎀 FUNCTION] Alert Settings
 # 💗────────────────────────────────────────────
@@ -32,11 +32,15 @@ async def alert_settings_func(bot: commands.Bot, interaction: discord.Interactio
         )
         egg_alert = await fetch_user_egg_alert(bot, interaction.user.id)
         item_alert = await fetch_user_item_alert(bot, interaction.user.id)
+        research_fossil_alert = await fetch_user_research_fossil_alert(
+            bot, interaction.user.id
+        )
 
         faction_ball_alert = faction_ball_alert or {"notify": "off"}
         wb_battle_alert = wb_battle_alert or {"notify": "off"}
         egg_alert = egg_alert or {"notify": "off"}
         item_alert = item_alert or {"notify": "off"}
+        research_fossil_alert = research_fossil_alert or {"notify": "off"}
 
         view = AlertSettingsView(
             bot,
@@ -45,6 +49,7 @@ async def alert_settings_func(bot: commands.Bot, interaction: discord.Interactio
             wb_battle_alert,
             egg_alert=egg_alert,
             item_alert=item_alert,
+            research_fossil_alert=research_fossil_alert,
         )
 
         message = await interaction.followup.send(
@@ -64,6 +69,7 @@ async def alert_settings_func(bot: commands.Bot, interaction: discord.Interactio
             ephemeral=True,
         )
 
+
 # 💗────────────────────────────────────────────
 # [🌸 VIEW CLASS] Alert Settings View (patched)
 # 💗────────────────────────────────────────────
@@ -76,6 +82,7 @@ class AlertSettingsView(discord.ui.View):
         wb_battle_alert,
         egg_alert,
         item_alert,
+        research_fossil_alert,
     ):
         super().__init__(timeout=180)
         self.bot = bot
@@ -84,6 +91,7 @@ class AlertSettingsView(discord.ui.View):
         self.wb_battle_alert = wb_battle_alert
         self.egg_alert = egg_alert
         self.item_alert = item_alert
+        self.research_fossil_alert = research_fossil_alert
         self.message = None  # set later
         self.update_button_styles()
 
@@ -214,6 +222,7 @@ class AlertSettingsView(discord.ui.View):
                 "⚠️ An error occurred while updating World Boss Battle Alert.",
                 ephemeral=True,
             )
+
     # 💫────────────────────────────────────
     # [🥚 BUTTON] Egg Hatch/Hold Alert (3 -State Cycle)
     # 💫────────────────────────────────────
@@ -281,6 +290,7 @@ class AlertSettingsView(discord.ui.View):
                 "⚠️ An error occurred while updating Egg Hatch/Hold Alert.",
                 ephemeral=True,
             )
+
     # 💫────────────────────────────────────
     # [🛡️ BUTTON] Item Alert (3-State Cycle)
     # 💫────────────────────────────────────
@@ -288,6 +298,7 @@ class AlertSettingsView(discord.ui.View):
         label="Item Alert: OFF",
         style=ButtonStyle.secondary,
         emoji=Emojis.held_item,
+        row=1,
     )
     async def item_alert_button(
         self, interaction: discord.Interaction, button: discord.ui.Button
@@ -348,6 +359,76 @@ class AlertSettingsView(discord.ui.View):
                 "⚠️ An error occurred while updating Item Alert.",
                 ephemeral=True,
             )
+
+    # 💫────────────────────────────────────
+    # [🦴 BUTTON] Research Fossil Alert (3-State Cycle)
+    # 💫────────────────────────────────────
+    @discord.ui.button(
+        label="Research Fossil Alert: OFF",
+        style=ButtonStyle.secondary,
+        emoji="🦴",
+        row=1,
+    )
+    async def research_fossil_alert_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "You cannot interact with this button.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+        try:
+            current_state = (
+                str(self.research_fossil_alert.get("notify", "off")).lower()
+                if self.research_fossil_alert
+                else "off"
+            )
+
+            # 🔹 3-State Cycle: off → on → on_no_pings → off
+            if current_state == "off":
+                new_state = "on"
+            elif current_state == "on":
+                new_state = "on_no_pings"
+            else:  # react or any other state
+                new_state = "off"
+
+            await upsert_user_research_fossil_alert(self.bot, self.user, new_state)
+            self.research_fossil_alert = {"notify": new_state}
+
+            # 🔹 Refresh buttons
+            self.update_button_styles()
+
+            # 🔹 Display friendly text
+            display_text = {
+                "off": "OFF",
+                "on": "ON",
+                "on_no_pings": "ON (No Pings)",
+            }.get(new_state, "OFF")
+
+            await interaction.edit_original_response(
+                content=f"Modify your Alert Settings:\n🦴 Research Fossil Alert set to **{display_text}**",
+                view=self,
+            )
+
+            pretty_log(
+                tag="ui",
+                message=f"{self.user.display_name} set Research Fossil Alert to {display_text}",
+                bot=self.bot,
+            )
+
+        except Exception as e:
+            pretty_log(
+                tag="error",
+                message=f"Error toggling Research Fossil Alert: {e}",
+                bot=self.bot,
+            )
+            await interaction.followup.send(
+                "⚠️ An error occurred while updating Research Fossil Alert.",
+                ephemeral=True,
+            )
+
     # 💫────────────────────────────────────
     # [🎨 STYLE UPDATE FUNCTION]
     # 💫────────────────────────────────────
@@ -429,6 +510,27 @@ class AlertSettingsView(discord.ui.View):
         else:
             self.item_alert_button.style = ButtonStyle.secondary
             self.item_alert_button.label = "Item Alert: OFF"
+
+        # 🦴 Research Fossil Alert Button (3 states)
+        research_fossil_alert_state = (
+            str(self.research_fossil_alert.get("notify", "off")).lower()
+            if self.research_fossil_alert
+            else "off"
+        )
+        if research_fossil_alert_state == "off":
+            self.research_fossil_alert_button.style = ButtonStyle.secondary
+            self.research_fossil_alert_button.label = "Research Fossil Alert: OFF"
+        elif research_fossil_alert_state == "on":
+            self.research_fossil_alert_button.style = ButtonStyle.success
+            self.research_fossil_alert_button.label = "Research Fossil Alert: ON"
+        elif research_fossil_alert_state == "on_no_pings":
+            self.research_fossil_alert_button.style = ButtonStyle.primary
+            self.research_fossil_alert_button.label = (
+                "Research Fossil Alert: ON (No Pings)"
+            )
+        else:
+            self.research_fossil_alert_button.style = ButtonStyle.secondary
+            self.research_fossil_alert_button.label = "Research Fossil Alert: OFF"
 
     # 💫────────────────────────────────────
     # [⏰ TIMEOUT HANDLER]

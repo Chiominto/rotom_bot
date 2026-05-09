@@ -12,7 +12,7 @@ from constants.celestial_constants import (
 
 LOG_CHANNEL_ID = CELESTIAL_TEXT_CHANNELS.server_logs
 
-ALLOWED_GUILD_IDS = [CELESTIALS_SERVER_ID, CC_SERVER_ID]
+ALLOWED_GUILD_IDS = [CELESTIALS_SERVER_ID, CC_SERVER_ID, 1229729585923362816]
 
 from utils.logs.pretty_log import pretty_log
 

@@ -1,11 +1,19 @@
 from utils.logs.pretty_log import pretty_log
+
 # 🔮────────────────────────────────────────────
 #        ⚡ Processed ids Cache
 # 👻────────────────────────────────────────────
 processed_faction_ball_alerts = set()
+processed_caught_messages = set()
+not_weakness_chart_user_names = set()
+processed_weakness_messages: set[int] = set()
 LIST_OF_PROCESSED_IDS = [
     processed_faction_ball_alerts,
+    processed_caught_messages,
+    processed_weakness_messages,
 ]
+
+
 def clear_processed_ids_cache():
     for id_set in LIST_OF_PROCESSED_IDS:
         id_set.clear()
@@ -190,3 +198,42 @@ battle_timer_users_cache: dict[str, str] = {}
 #    "user_name" : str,
 #    ...
 # }
+
+# 🔮────────────────────────────────────────────
+#        ⚡ Utility Cache
+# 👻────────────────────────────────────────────
+utility_cache: dict[int, dict[str, str | dict[str, str]]] = {}
+# Structure:
+# {
+#   user_id: {
+#     "user_name": str,
+#     "utilities": {
+#       "weakness_chart": str,
+#       "fossil_alert": str,
+#       ...
+#     }
+#   },
+
+# 🔮────────────────────────────────────────────
+#        ⚡ Research Fossil Alert Cache
+# 👻────────────────────────────────────────────
+research_fossil_alert_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "notify": str
+# }
+
+# 💫━━━━━━━━━━━━━━━━━━━━━━━━━
+#       🌸 Weakness Data Cache 🌸
+# 💫━━━━━━━━━━━━━━━━━━━━━━━━━
+weakness_data_cache: dict[str, dict] = {}
+# Structure:
+# {
+#   pokemon_name: {
+# "title": str,
+# "description": str,
+# "note": str,
+# "footer": str,
+# "color": int,
+#   },

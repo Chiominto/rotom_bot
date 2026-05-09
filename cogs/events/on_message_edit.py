@@ -6,7 +6,7 @@ from utils.logs.pretty_log import pretty_log
 from utils.listener_func.faction_ball_alert import faction_ball_alert
 from utils.listener_func.berry_listener import berry_listener
 from utils.listener_func.berry_pouch_listener import handle_berry_pouch_message
-
+from utils.listener_func.pokemon_caught_listener import pokemon_caught_listener
 from utils.listener_func.wb_reg_listener import handle_wb_register_command
 
 FISHING_COLOR = 0x87CEFA
@@ -59,6 +59,16 @@ class OnMessageEditCog(commands.Cog):
             and not after.webhook_id
         ):
             return
+        # ————————————————————————————————
+        # ⚡ Pokemon Caught Listener
+        # ————————————————————————————————
+        # Process Pokemon or fish caught for Weekly Goal Tracker
+        if after.embeds:
+            embed_description = after.embeds[0].description or ""
+            if embed_description and "You caught a" in embed_description:
+                await pokemon_caught_listener(
+                    bot=self.bot, before_message=before, message=after
+                )
         # ————————————————————————————————
         # ⚡ Faction Ball Alert
         # ————————————————————————————————

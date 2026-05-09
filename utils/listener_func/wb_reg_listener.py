@@ -12,7 +12,9 @@ from utils.functions.get_pokemeow_reply import (
     get_pokemeow_reply,
 )
 from utils.logs.debug_log import debug_log, enable_debug
-
+from .pokemon_caught_listener import phone_copy_description
+from utils.db.utilities_db import upsert_utility_setting
+from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache
 # Structure: {boss_name: {"time": unix_seconds, "users": set(user_ids), "task": asyncio.Task, "channels": {user_id: channel}}}
 wb_tasks = {}
 
@@ -94,11 +96,16 @@ async def world_boss_waiter(
         if not task_info:
             return
 
+        phone_setting = (
+            fetch_user_utility_type_setting_cache(user.id, "phone") or "iphone"
+        )
+        command_line = ";wb f"
+        command_line = phone_copy_description(command_line, phone_setting)
         embed = discord.Embed(
-            description=";wb f",
+            description=command_line,
             color=DEFAULT_EMBED_COLOR,
         )
-        embed.add_field(name="Iphone Copy:", value="`;wb f`", inline=False)
+
         for user_id in list(task_info["users"]):
             channel = task_info["channels"].get(user_id)
             user = bot.get_user(user_id)

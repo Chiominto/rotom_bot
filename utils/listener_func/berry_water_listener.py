@@ -3,7 +3,6 @@ import time
 
 import discord
 
-
 from utils.db.berry_reminder import (
     berry_map,
     fetch_user_all_berry_reminder,
@@ -13,12 +12,12 @@ from utils.db.berry_reminder import (
     update_water_can_type_for_slot,
     upsert_berry_reminder,
 )
+from utils.functions.get_pokemeow_reply import get_pokemeow_reply
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
-from utils.functions.get_pokemeow_reply import get_pokemeow_reply
 
-enable_debug(f"{__name__}.handle_berry_water_message")
-enable_debug(f"{__name__}.handle_growth_mulch_message")
+# enable_debug(f"{__name__}.handle_berry_water_message")
+# enable_debug(f"{__name__}.handle_growth_mulch_message")
 
 
 def parse_berry_water_message(message: str):
@@ -86,6 +85,7 @@ async def handle_berry_water_message(bot: discord.Client, message: discord.Messa
     debug_log(f"Parsed berry water message: {parsed_data}")
 
     from utils.cache.celestial_members_cache import fetch_channel_id_cache
+
     member_channel_id = (
         fetch_channel_id_cache(user_id)
         if fetch_channel_id_cache(user_id)
