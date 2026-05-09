@@ -11,7 +11,7 @@ from utils.functions.visual_helpers import build_ev_tracker_embed
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-#enable_debug(f"{__name__}.handle_pokemeow_embed_sync")
+# enable_debug(f"{__name__}.handle_pokemeow_embed_sync")
 
 
 # 🤍━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -189,6 +189,7 @@ async def handle_pokemeow_embed_sync(bot, message: discord.Message):
             pokemon=tracked_data["pokemon"],
             dex_number=tracked_data.get("dex_number"),
             evs=tracked_evs,
+            goals=tracked_data.get("goals", {}),
         )
         ev_tracker_cache[user_id]["evs"] = tracked_evs
         debug_log(f"Successfully updated EVs for {user_name}: {tracked_evs}")

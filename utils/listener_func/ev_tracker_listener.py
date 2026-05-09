@@ -3,12 +3,11 @@ import discord
 
 from utils.cache.cache_list import ev_tracker_cache
 from utils.db.ev_tracker_db import add_or_update_ev, delete_tracked_ev
+from utils.functions.visual_helpers import build_ev_tracker_embed
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
-from utils.functions.visual_helpers import build_ev_tracker_embed
 
-
-#enable_debug(f"{__name__}.handle_pokemeow_battle_message")
+# enable_debug(f"{__name__}.handle_pokemeow_battle_message")
 trainer_emoji = "<:trainer_brendan:1370001925092806706>"
 
 EV_MAP = {
@@ -133,6 +132,7 @@ async def handle_pokemeow_battle_message(bot, message: discord.Message):
             pokemon=tracked_data["pokemon"],
             dex_number=tracked_data.get("dex_number"),
             evs=updated_evs,
+            goals=tracked_goals,
         )
         ev_tracker_cache[user_id]["evs"] = updated_evs
 
@@ -142,7 +142,6 @@ async def handle_pokemeow_battle_message(bot, message: discord.Message):
         pretty_log(
             tag="ev",
             message=f"Awarded EVs to {winner_name} ({tracked_data['pokemon']}): {updated_evs}",
-
         )
 
     except Exception as e:
@@ -150,7 +149,6 @@ async def handle_pokemeow_battle_message(bot, message: discord.Message):
         pretty_log(
             tag="error",
             message=f"Failed to award EVs to {winner_name}: {e}",
-
         )
         return
 
@@ -174,12 +172,10 @@ async def handle_pokemeow_battle_message(bot, message: discord.Message):
         pretty_log(
             tag="ev",
             message=f"EV tracker completed for {winner_name} ({tracked_data['pokemon']})!",
-
         )
         await delete_tracked_ev(bot, user_id)
         remove_ev_tracker_cache(user_id)
         pretty_log(
             tag="ev",
             message=f"EV tracker data deleted for {winner_name} ({tracked_data['pokemon']}) after completion.",
-
         )
