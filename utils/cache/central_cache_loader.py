@@ -16,6 +16,8 @@ from .celestial_members_cache import load_celestial_members_cache
 from .timers_cache import load_timer_cache
 from .utilities_cache import load_utility_cache
 from .research_fossil_alert_cache import load_research_fossil_alert_cache
+from .weekly_goal_tracker_cache import load_weekly_goal_cache
+from .monthly_goal_tracker_cache import load_monthly_goal_cache
 
 async def load_all_cache(bot: discord.Client):
     """
@@ -31,6 +33,12 @@ async def load_all_cache(bot: discord.Client):
 
         # Load Celestial Members Cache
         await load_celestial_members_cache(bot)
+
+        # Load Weekly Goal Cache
+        await load_weekly_goal_cache(bot)
+
+        # Load Monthly Goal Cache
+        await load_monthly_goal_cache(bot)
 
         # Load Timer Settings Cache
         await load_timer_cache(bot)

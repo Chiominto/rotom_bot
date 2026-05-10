@@ -7,10 +7,17 @@ processed_faction_ball_alerts = set()
 processed_caught_messages = set()
 not_weakness_chart_user_names = set()
 processed_weakness_messages: set[int] = set()
+processed_explore_messages = set()
+processed_weekly_stats_messages = set()
+processed_monthly_stats_messages = set()
+
 LIST_OF_PROCESSED_IDS = [
     processed_faction_ball_alerts,
     processed_caught_messages,
     processed_weakness_messages,
+    processed_explore_messages,
+    processed_weekly_stats_messages,
+    processed_monthly_stats_messages,
 ]
 
 
@@ -237,3 +244,29 @@ weakness_data_cache: dict[str, dict] = {}
 # "footer": str,
 # "color": int,
 #   },
+# 💫━━━━━━━━━━━━━━━━━━━━━━━━━
+#       🌸 Weekly Goal Cache 🌸
+# 💫━━━━━━━━━━━━━━━━━━━━━━━━━
+weekly_goal_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "pokemon_caught": int,
+#   "fish_caught": int,
+#   "battles_won": int,
+#   "channel_id": int,
+#   "weekly_requirement_mark": bool,
+# }
+# 💫━━━━━━━━━━━━━━━━━━━━━━━━━
+#       🌸 Monthly Goal Cache 🌸
+# 💫━━━━━━━━━━━━━━━━━━━━━━━━━
+monthly_goal_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "pokemon_caught": int,
+#   "fish_caught": int,
+#   "battles_won": int,
+#   "channel_id": int,
+#   "monthly_requirement_mark": bool,
+# }

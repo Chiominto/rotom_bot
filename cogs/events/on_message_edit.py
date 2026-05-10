@@ -2,14 +2,27 @@ import discord
 from discord.ext import commands
 
 from constants.celestial_constants import CC_SERVER_ID, POKEMEOW_APPLICATION_ID
-from utils.logs.pretty_log import pretty_log
-from utils.listener_func.faction_ball_alert import faction_ball_alert
 from utils.listener_func.berry_listener import berry_listener
 from utils.listener_func.berry_pouch_listener import handle_berry_pouch_message
+from utils.listener_func.explore_caught_listener import explore_caught_listener
+from utils.listener_func.faction_ball_alert import faction_ball_alert
+from utils.listener_func.monthly_stats_listener import monthly_stats_listener
 from utils.listener_func.pokemon_caught_listener import pokemon_caught_listener
 from utils.listener_func.wb_reg_listener import handle_wb_register_command
+from utils.listener_func.weekly_stats_listener import weekly_stats_listener
+from utils.logs.pretty_log import pretty_log
 
 FISHING_COLOR = 0x87CEFA
+# ️────────────────────────────────────────────
+#        ⚔️ Message Triggers
+# ️────────────────────────────────────────────
+triggers = {
+    "weekly_stats_command": "**Clan Weekly Stats — Celestial**",
+    "monthly_stats_command": "**Clan Monthly Stats — Celestial**",
+    "explore_listener": ":stopwatch: Your explore session has ended!",
+    "caught_listener": "You caught a",
+}
+
 
 # 🟣────────────────────────────────────────────
 #         💤 Message Edit Listener Cog
@@ -91,6 +104,40 @@ class OnMessageEditCog(commands.Cog):
                     bot=self.bot,
                 )"""
                 await faction_ball_alert(bot=self.bot, before=before, after=after)
+
+        # ————————————————————————————————
+        # 🩵 Weekly Stats Listener
+        # ————————————————————————————————
+        if first_embed:
+            if triggers["weekly_stats_command"] in first_embed_title:
+                pretty_log(
+                    "info",
+                    f"Detected edit triggering Weekly Stats Listener in {after.channel.name}",
+                )
+                await weekly_stats_listener(self.bot, before, after)
+        # ————————————————————————————————
+        # 🩵 Monthly Stats Listener
+        # ————————————————————————————————
+        if first_embed:
+            if triggers["monthly_stats_command"] in first_embed_title:
+
+                pretty_log(
+                    "info",
+                    f"Detected edit triggering Monthly Stats Listener in {after.channel.name}",
+                )
+                await monthly_stats_listener(self.bot, before, after)
+
+        # ————————————————————————————————
+        # 🩵 Explore Caught Listener
+        # ————————————————————————————————
+        if content:
+            if triggers["explore_listener"] in content:
+                pretty_log(
+                    "info",
+                    f"Detected edit triggering Explore Caught Listener in {after.channel.name}",
+                )
+                await explore_caught_listener(self.bot, before, after)
+
         # ————————————————————————————————
         # ⚡ Berry Command Listener
         # ————————————————————————————————
@@ -143,6 +190,7 @@ class OnMessageEditCog(commands.Cog):
                 await handle_wb_register_command(
                     bot=self.bot, before_message=before, message=after
                 )
+
 
 # 🟣────────────────────────────────────────────
 #         💤 Setup Function

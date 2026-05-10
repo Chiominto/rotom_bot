@@ -8,7 +8,8 @@ from utils.background_task.central_loop_task.berry_checker import berry_reminder
 from utils.background_task.central_loop_task.berry_water_checker import (
     berry_water_reminder,
 )
-
+from utils.cache.weekly_goal_tracker_cache import flush_weekly_goal_cache
+from utils.cache.monthly_goal_tracker_cache import flush_monthly_goal_cache
 # 🍰──────────────────────────────
 #   🎀 Cog: CentralLoop
 #   Handles background tasks every 60 seconds
@@ -32,7 +33,6 @@ class CentralLoop(commands.Cog):
         """Background loop that ticks every 60 seconds"""
         await self.bot.wait_until_ready()
 
-
         pretty_log(
             "",
             "✅ Central loop started!",
@@ -53,6 +53,12 @@ class CentralLoop(commands.Cog):
 
                 # Check berry growth reminders
                 await berry_reminder_checker(bot=self.bot)
+
+                # 🧼 Flush weekly goal cache
+                await flush_weekly_goal_cache(bot=self.bot)
+
+                # 🧼 Flush monthly goal cache
+                await flush_monthly_goal_cache(bot=self.bot)
 
             except Exception as e:
                 pretty_log(
@@ -81,5 +87,7 @@ async def setup(bot: commands.Bot):
     print("  ─────────────────────────────────────────────")
     print("  ✅ ⏰  berry_reminder_checker")
     print("  ✅ ⏰  berry_water_reminder")
+    print("  ✅ ⏰  flush_weekly_goal_cache")
+    print("  ✅ ⏰  flush_monthly_goal_cache")
     print("  🧭 CentralLoop ticking every 60 seconds!")
     print("  ─────────────────────────────────────────────\n")

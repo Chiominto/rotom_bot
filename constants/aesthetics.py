@@ -102,7 +102,8 @@ class Thumbnails:
     harvest = "https://media.discordapp.net/attachments/1394913073520967680/1493054040156672181/image.png?ex=69dd926e&is=69dc40ee&hm=1071a71309cee0af0aeae11d7e3ada49a754c0cbe9e658f2f8a9f8b6a960cdae&=&format=webp&quality=lossless&width=450&height=450"
     water = "https://media.discordapp.net/attachments/1394913073520967680/1493054108595257344/image.png?ex=69dd927f&is=69dc40ff&hm=b8a7e2388e78b4df517bdb152681e4a293efe5e9a49e1e6bfc2275a50131e3d3&=&format=webp&quality=lossless&width=450&height=450"
     drought = "https://media.discordapp.net/attachments/1394913073520967680/1493054165981859900/image.png?ex=69dd928c&is=69dc410c&hm=477948b20ba944a9b1c12f0d3697b6813344e33efa0b9b3104657e95b96d99d5&=&format=webp&quality=lossless&width=450&height=450"
-
+    weekly_goal = "https://cdn.discordapp.com/attachments/1493871255475191888/1502875915070472382/b66e440c52436db99b4eab1455794797-removebg-preview.png?ex=6a014dc4&is=69fffc44&hm=5e97691381cdeae41d07e115847e067a66b9c01dbfe1c2b34be73f177cdbd902&"
+    monthly_goal = "https://cdn.discordapp.com/attachments/1493871255475191888/1502875914793517066/0deec6df89dd7f84f583506d21dc27e5-removebg-preview.png?ex=6a014dc4&is=69fffc44&hm=ed2beb3c685904190f7280152674a37c3e95eba6b8fc0574ab7534c757328a33&"
 
 class TYPE_EMOJI:
     dark = "<:darktype:1229731181508034641>"

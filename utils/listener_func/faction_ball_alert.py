@@ -12,6 +12,7 @@ from utils.cache.cache_list import (
 )
 from utils.cache.faction_cache import get_user_id_by_name
 from utils.db.faction_ball_alert_db_func import (
+    fetch_user_faction_ball_alert,
     upsert_user_faction_ball_alert_via_user_id,
 )
 from utils.functions.get_pokemeow_reply import get_pokemeow_reply
@@ -79,6 +80,47 @@ def resolve_user_id(guild, user_name):
     if member:
         return member.id
     return None
+
+
+async def ensure_faction_ball_alert_setting(
+    bot: discord.Client,
+    user_id: int | None,
+    user_name: str | None,
+):
+    """Return cached faction ball settings, creating defaults only if absent in both cache and DB."""
+    if user_id is None:
+        debug_log("No user_id available, cannot ensure faction ball alert setting")
+        return None
+
+    cached_setting = faction_ball_alert_cache.get(user_id)
+    debug_log(
+        f"Initial faction ball alert cache lookup for {user_id}: {cached_setting}"
+    )
+    if cached_setting:
+        return cached_setting
+
+    db_record = await fetch_user_faction_ball_alert(bot, user_id)
+    debug_log(f"Fetched faction ball alert from DB for {user_id}: {db_record}")
+
+    if db_record:
+        refreshed_setting = faction_ball_alert_cache.get(user_id)
+        debug_log(
+            f"DB record exists for {user_id}; cache after DB fetch remains: {refreshed_setting}"
+        )
+        return refreshed_setting
+
+    await upsert_user_faction_ball_alert_via_user_id(
+        bot=bot,
+        user_id=user_id,
+        user_name=user_name or f"User {user_id}",
+        notify="on_no_pings",
+    )
+    debug_log(
+        f"No faction ball alert found in cache or DB for {user_id}; upserted default settings"
+    )
+    refreshed_setting = faction_ball_alert_cache.get(user_id)
+    debug_log(f"Cache after default upsert for {user_id}: {refreshed_setting}")
+    return refreshed_setting
 
 
 # 🛡️────────────────────────────────────────────
@@ -207,20 +249,14 @@ async def faction_ball_alert(
         debug_log(f"User faction ball alert settings: {user_faction_ball_alert}")
 
         if not user_faction_ball_alert:
-            # Only upsert when we have a valid user_id
             if user_id is not None:
-                await upsert_user_faction_ball_alert_via_user_id(
+                user_faction_ball_alert = await ensure_faction_ball_alert_setting(
                     bot=bot,
                     user_id=user_id,
                     user_name=member.name if member else trainer_name,
-                    notify="on_no_pings",
                 )
                 debug_log(
-                    "No existing settings found — upserted default faction ball alert settings for user"
-                )
-                user_faction_ball_alert = faction_ball_alert_cache.get(user_id)
-                debug_log(
-                    f"Re-fetched user faction ball alert after upsert: {user_faction_ball_alert}"
+                    f"Faction ball alert after primary ensure for {user_id}: {user_faction_ball_alert}"
                 )
             else:
                 debug_log("No user_id available yet, skipping initial upsert")
@@ -233,13 +269,10 @@ async def faction_ball_alert(
                         debug_log(
                             f"Fetched user ID from cache by trainer name: {user_id}"
                         )
-                        user_faction_ball_alert = faction_ball_alert_cache.get(user_id)
                         fishing_user = after.guild.get_member(user_id)
                         debug_log(f"Fetched fishing user from guild: {fishing_user}")
-
-                        # If fallback resolved user_id but settings still missing, create defaults now.
-                        if not user_faction_ball_alert:
-                            await upsert_user_faction_ball_alert_via_user_id(
+                        user_faction_ball_alert = (
+                            await ensure_faction_ball_alert_setting(
                                 bot=bot,
                                 user_id=user_id,
                                 user_name=(
@@ -251,17 +284,11 @@ async def faction_ball_alert(
                                         else trainer_name
                                     )
                                 ),
-                                notify="on_no_pings",
                             )
-                            debug_log(
-                                "Fallback resolved user_id — upserted default faction ball alert settings"
-                            )
-                            user_faction_ball_alert = faction_ball_alert_cache.get(
-                                user_id
-                            )
-                            debug_log(
-                                f"Re-fetched user faction ball alert after fallback upsert: {user_faction_ball_alert}"
-                            )
+                        )
+                        debug_log(
+                            f"Faction ball alert after fallback ensure for {user_id}: {user_faction_ball_alert}"
+                        )
                     else:
                         user_id = None
                         debug_log("No user ID found in cache, returning early")

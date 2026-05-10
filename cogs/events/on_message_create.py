@@ -6,6 +6,8 @@ from constants.celestial_constants import (
     CELESTIAL_TEXT_CHANNELS,
     POKEMEOW_APPLICATION_ID,
 )
+from utils.listener_func.monthly_stats_listener import monthly_stats_listener
+from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.listener_func.bud_ev_listener import handle_pokemeow_embed_sync
 from utils.listener_func.ev_tracker_listener import handle_pokemeow_battle_message
 from utils.listener_func.faction_ball_alert import faction_ball_alert
@@ -29,7 +31,12 @@ from utils.listener_func.battle_timer import detect_pokemeow_battle
 from utils.listener_func.battle_weakness import weakness_chart
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 
-triggers = {"bud_info_trigger": "**Level**:", "ev_training": "won the battle"}
+triggers = {
+    "bud_info_trigger": "**Level**:",
+    "ev_training": "won the battle",
+    "weekly_stats_command": "**Clan Weekly Stats — Celestial**",
+    "monthly_stats_command": "**Clan Monthly Stats — Celestial**",
+}
 
 
 # 🟣────────────────────────────────────────────
@@ -294,7 +301,32 @@ class MessageCreateListener(commands.Cog):
                         f"Battle weakness processing failed for message {message.id} in {message.channel.name}: {bw_e}",
                         source="weakness_chart",
                     )
-
+        # ————————————————————————————————
+        # 🩵 Weekly Stats Listener
+        # ————————————————————————————————
+        if first_embed:
+            if triggers["weekly_stats_command"] in first_embed_title:
+                pretty_log(
+                    "info",
+                    f"Detected weekly stats embed from PokéMeow bot: Message ID {message.id}",
+                    label="Weekly Stats Listener",
+                )
+                await weekly_stats_listener(
+                    bot=self.bot, before_message=message, after_message=message
+                )
+        # ————————————————————————————————
+        # 🩵 Monthly Stats Listener
+        # ————————————————————————————————
+        if first_embed:
+            if triggers["monthly_stats_command"] in first_embed_title:
+                pretty_log(
+                    "info",
+                    f"Detected monthly stats embed from PokéMeow bot: Message ID {message.id}",
+                    label="Monthly Stats Listener",
+                )
+                await monthly_stats_listener(
+                    bot=self.bot, before_message=message, after_message=message
+                )
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────

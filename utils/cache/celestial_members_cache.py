@@ -126,3 +126,7 @@ def remove_celestial_member_cache(user_id: int):
         del celestial_members_cache[user_id]
         return True
     return False
+
+def fetch_all_user_ids_from_cache():
+    """Fetches all user IDs from the celestial members cache."""
+    return list(celestial_members_cache.keys())

@@ -7,12 +7,15 @@ KHY_USER_ID = 952071312124313611
 BURGER_USER_ID = 682429434720288797
 ERROR_LOG_CHANNEL_ID = 1444997181244444672
 a = 1490116594884411402
+MONTHLY_REQUIREMENT = 2000
+WEEKLY_REQUIREMENT = 500
 
 
 # 💦☁────────────────────────────────────────────💦☁
 #       CELESTIAL_TEXT_CHANNELS
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_TEXT_CHANNELS:
+    goal_tracker = 1502845251671556228
 
     # 🌊💙🤍───────────── Admin ─────────────💙🤍🌊
     roles_breakdown = 1492921526591291563

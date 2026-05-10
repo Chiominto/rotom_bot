@@ -10,7 +10,7 @@ from utils.logs.pretty_log import pretty_log
 
 from .faction_ball_alert import extract_member_username_from_embed, get_user_id_by_name
 
-enable_debug(f"{__name__}.held_item_ping_handler")
+#enable_debug(f"{__name__}.held_item_ping_handler")
 
 
 async def held_item_ping_handler(bot: commands.Bot, message: discord.Message):
