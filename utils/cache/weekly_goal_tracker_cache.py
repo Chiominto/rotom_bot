@@ -54,7 +54,7 @@ def upsert_weekly_goal_cache(
         if channel_id is not None:
             weekly_goal_cache[user_id]["channel_id"] = channel_id
         weekly_goal_cache[user_id]["user_name"] = user_name
-        weekly_goal_cache[user_id].setdefault("weekly_requirement_mark", False)
+        weekly_goal_cache[user_id]["weekly_requirement_mark"] = weekly_requirement_mark
     else:
         # Insert new entry
         weekly_goal_cache[user_id] = {
@@ -63,7 +63,7 @@ def upsert_weekly_goal_cache(
             "battles_won": battles_won,
             "channel_id": channel_id,
             "user_name": user_name,
-            "weekly_requirement_mark": False,
+            "weekly_requirement_mark": weekly_requirement_mark,
         }
 
     # Mark this user as dirty for flushing

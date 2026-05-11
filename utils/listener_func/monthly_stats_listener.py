@@ -8,18 +8,21 @@ from constants.celestial_constants import (
     MONTHLY_REQUIREMENT,
     WEEKLY_REQUIREMENT,
 )
-from utils.cache.cache_list import processed_monthly_stats_messages, celestial_members_cache
+from utils.cache.cache_list import (
+    celestial_members_cache,
+    processed_monthly_stats_messages,
+)
 from utils.db.monthly_goal_tracker import fetch_all_monthly_goals, upsert_monthly_goal
 from utils.db.weekly_goal_tracker import fetch_all_weekly_goals, upsert_weekly_goal
+from utils.functions.get_pokemeow_reply import (
+    get_message_interaction_member,
+    get_pokemeow_reply,
+)
 from utils.functions.stats_parsers import (
     parse_clan_stats_message,
     split_known_and_unknown_members,
 )
 from utils.logs.pretty_log import pretty_log
-from utils.functions.get_pokemeow_reply import (
-    get_message_interaction_member,
-    get_pokemeow_reply,
-)
 
 from .pokemon_caught_listener import goal_checker
 from .weekly_stats_listener import extract_current_page_number
@@ -56,8 +59,8 @@ async def monthly_stats_listener(
 
     # Check if command user is in monthly and weekly goal caches
     from utils.cache.cache_list import (
-        monthly_goal_cache,
         celestial_members_cache,
+        monthly_goal_cache,
         weekly_goal_cache,
     )
 
@@ -151,6 +154,12 @@ async def monthly_stats_listener(
                 continue
             member_info = celestial_members_cache.get(member_id)
             channel_id = member_info.get("channel_id") if member_info else None
+            # Preserve existing requirement mark if user is already in cache
+            from utils.cache.cache_list import monthly_goal_cache
+
+            existing_mark = monthly_goal_cache.get(member_id, {}).get(
+                "monthly_requirement_mark", False
+            )
             await upsert_monthly_goal(
                 bot=bot,
                 user_id=member_id,
@@ -159,7 +168,7 @@ async def monthly_stats_listener(
                 pokemon_caught=catches,
                 fish_caught=fishes,
                 battles_won=0,
-                monthly_requirement_mark=False,
+                monthly_requirement_mark=existing_mark,
             )
             await goal_checker(
                 bot=bot,
@@ -186,8 +195,16 @@ async def monthly_stats_listener(
             old_catches = old_goal.get("pokemon_caught") if old_goal else 0
             old_fishes = old_goal.get("fish_caught") if old_goal else 0
             if catches != old_catches or fishes != old_fishes:
-                member_info = celestial_members_cache.get(member_id) if member_id else None
+                member_info = (
+                    celestial_members_cache.get(member_id) if member_id else None
+                )
                 channel_id = member_info.get("channel_id") if member_info else None
+                # Preserve existing requirement mark to avoid resetting if goal_checker already set it true
+                from utils.cache.cache_list import monthly_goal_cache
+
+                existing_mark = monthly_goal_cache.get(member_id, {}).get(
+                    "monthly_requirement_mark", False
+                )
                 await upsert_monthly_goal(
                     bot=bot,
                     user_id=member_id,
@@ -196,7 +213,7 @@ async def monthly_stats_listener(
                     pokemon_caught=catches,
                     fish_caught=fishes,
                     battles_won=0,
-                    monthly_requirement_mark=False,
+                    monthly_requirement_mark=existing_mark,
                 )
                 await goal_checker(
                     bot=bot,

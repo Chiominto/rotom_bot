@@ -2,12 +2,11 @@ import discord
 
 from utils.cache.cache_list import monthly_goal_cache
 from utils.db.monthly_goal_tracker import fetch_all_monthly_goals
-from utils.logs.pretty_log import pretty_log
-
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-#enable_debug(f"{__name__}.flush_monthly_goal_cache")
+
+# enable_debug(f"{__name__}.flush_monthly_goal_cache")
 # Load monthly goals into cache
 async def load_monthly_goal_cache(bot: discord.Client):
     """Loads all monthly goal records from the database into the in-memory cache."""
@@ -58,7 +57,9 @@ def upsert_monthly_goal_cache(
         if channel_id is not None:
             monthly_goal_cache[user_id]["channel_id"] = channel_id
         monthly_goal_cache[user_id]["user_name"] = user_name
-        monthly_goal_cache[user_id].setdefault("monthly_requirement_mark", False)
+        monthly_goal_cache[user_id][
+            "monthly_requirement_mark"
+        ] = monthly_requirement_mark
     else:
         # Insert new entry
         monthly_goal_cache[user_id] = {
@@ -67,7 +68,7 @@ def upsert_monthly_goal_cache(
             "battles_won": battles_won,
             "channel_id": channel_id,
             "user_name": user_name,
-            "monthly_requirement_mark": False,
+            "monthly_requirement_mark": monthly_requirement_mark,
         }
 
     # Mark this user as dirty for flushing

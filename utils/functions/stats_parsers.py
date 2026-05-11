@@ -137,8 +137,10 @@ def should_parse(embed_title: Optional[str]) -> bool:
 
 
 def clean_username(username: str) -> str:
-    # Strip any leading/trailing ** from username cleanly
-    return re.sub(r"^\*+|\*+$", "", username).strip()
+    # Strip formatting markers, then unescape markdown escapes (e.g. \_ -> _).
+    cleaned = re.sub(r"^\*+|\*+$", "", username).strip()
+    cleaned = re.sub(r"\\([_*~`|>])", r"\1", cleaned)
+    return cleaned
 
 
 def parse_clan_stats_message(message: str) -> Optional[List[Tuple[str, int, int]]]:
