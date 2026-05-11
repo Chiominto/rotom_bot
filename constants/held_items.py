@@ -11,7 +11,7 @@ class HELD_ITEM_EMOJI:
     focusband = Emojis.FocusBand
     luckyegg = Emojis.LuckyEgg
     magnet = Emojis.Magnet
-    hardstone = "<:hardstone:1411665043099095122>"
+    hardstone = Emojis.hard_stone
     miracleseed = Emojis.MiracleSeed
     mysticwater = Emojis.MysticWater
     nevermeltice = Emojis.Nevermelt_Ice
@@ -19,7 +19,7 @@ class HELD_ITEM_EMOJI:
     razorfang = Emojis.RazorFang
     sharpbeak = Emojis.Sharp_Beak
     silkscarf = Emojis.Silk_Scarf
-    silverpowder = "<:silverpowder:1411666189624541255>"
+    silverpowder = Emojis.Silver_Powder
     softsand = Emojis.Soft_Sand
     spelltag = Emojis.Spell_Tag
     twistedspoon = Emojis.Twisted_Spoon

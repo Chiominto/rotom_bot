@@ -92,7 +92,8 @@ class Emojis:
     Wooper = "<:Wooper:1497788118940516462>"
     Shuckle = "<:Shuckle:1497788134195462154>"
     Voltorb = "<:Voltorb:1497788102163304559>"
-
+    hard_stone = "<:Hard_Stone:1503205474965782569>"
+    Silver_Powder = "<:Silver_Powder:1503207381058982028>"
 class Dividers:
     command = "https://media.discordapp.net/attachments/1393740397905313912/1492445431534452807/image.png?ex=69db5b9f&is=69da0a1f&hm=cfe2045c7565dd7be1e494ff49fecffb1c83ec1c7ae51164e546e537325bf187&=&format=webp&quality=lossless&width=1865&height=124"
 
