@@ -1,15 +1,22 @@
 # -------------------- Imports --------------------
+import re
+
 import discord
 
-from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache,  upsert_utility_setting_cache
+from constants.aesthetics import TYPE_EMOJI
 from constants.form_base_names import FORM_BASE_NAMES
 from constants.weakness_chart import weakness_chart
+from utils.cache.utilities_cache import (
+    fetch_user_utility_type_setting_cache,
+    upsert_utility_setting_cache,
+)
 from utils.functions.stats_and_abilities_functions import (
     format_pokemon_abilities,
     get_immunities_based_on_abilities,
 )
 from utils.logs.pretty_log import pretty_log
-from constants.aesthetics import TYPE_EMOJI
+from utils.functions.pokemon_func import get_dex_number_by_name
+
 # -------------------- Constants --------------------
 type_emojis = {
     "grass": TYPE_EMOJI.grass,
@@ -97,7 +104,6 @@ def parse_normal_pokemon(dex_int: int, first_index: str, dex_count: int):
         pretty_log(
             "warn",
             f"Failed to resolve normal Pokemon for dex {dex_int}",
-
         )
 
     return variant_name, shiny_golden_tag, base_dex
@@ -121,7 +127,8 @@ def parse_form_pokemon(dex_int: int):
 
     if base_index >= len(FORM_BASE_NAMES):
         pretty_log(
-            "warn", f"Form dex {dex_int} is out of range.",
+            "warn",
+            f"Form dex {dex_int} is out of range.",
         )
 
         return None, None, None
@@ -152,6 +159,12 @@ def get_pokemon_from_input(pokemon_input: str):
             shiny_golden_tag = tag
             break
 
+    # Normalize Unown forms/symbol variants to base Unown for weakness lookup.
+    # Examples: "unown a", "unown-a", "unown ?", "unown(!)".
+    compact_unown = re.sub(r"[\s\-_/()]+", "", pokemon)
+    if re.fullmatch(r"unown([a-z]|[!?])?", compact_unown):
+        pokemon = "unown"
+
     normalized_name = pokemon.replace(" ", "-")
 
     # Name lookup
@@ -171,7 +184,6 @@ def get_pokemon_from_input(pokemon_input: str):
     pretty_log(
         "error",
         f"Unresolved Pokemon input: '{pokemon_input}'",
-
     )
     return None, None, None
 
@@ -208,7 +220,6 @@ def build_weakness_embed_from_input(pokemon_input: str) -> discord.Embed | None:
         pretty_log(
             "warn",
             f"No weaknesses found for {variant_name}",
-
         )
         return None
 
@@ -291,7 +302,6 @@ def build_user_weakness_embed(
         pretty_log(
             "warn",
             f"No weaknesses found for {variant_name}",
-
         )
         return None
 
@@ -327,7 +337,11 @@ def build_user_weakness_embed_w_o_cache(
 ) -> discord.Embed | None:
 
     # Check cache first
-    from utils.cache.utilities_cache import get_weakness_data, upsert_weakness_data_cache
+    from utils.cache.utilities_cache import (
+        get_weakness_data,
+        upsert_weakness_data_cache,
+    )
+
     cached_data = get_weakness_data(pokemon_input)
     if cached_data:
         cache_title = cached_data.get("title")
@@ -358,7 +372,6 @@ def build_user_weakness_embed_w_o_cache(
             pretty_log(
                 "warn",
                 f"No weaknesses found for {variant_name}",
-
             )
             return None
 
