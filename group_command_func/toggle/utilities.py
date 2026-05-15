@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from constants.aesthetics import Emojis
 from constants.celestial_constants import CELESTIAL_EMOJIS
+from utils.cache.cache_list import not_weakness_chart_user_names
 from utils.db.utilities_db import (
     fetch_user_utility_type_setting,
     upsert_utility_setting,
@@ -170,6 +171,11 @@ class UtilitySettingsView(discord.ui.View):
                 self.bot, self.user.id, self.user.name, "battle_weakness", new_state
             )
             self.battle_weakness_setting = {"setting": new_state}
+
+            # Re-enable weakness chart immediately after turning it on.
+            if new_state != "off":
+                not_weakness_chart_user_names.discard(self.user.name)
+                not_weakness_chart_user_names.discard(self.user.display_name)
 
             # 🔹 Refresh buttons
             self.update_button_styles()
