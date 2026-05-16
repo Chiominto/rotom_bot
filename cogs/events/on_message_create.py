@@ -29,7 +29,10 @@ from utils.listener_func.pokemon_timer import detect_pokemeow_reply
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.battle_timer import detect_pokemeow_battle
 from utils.listener_func.battle_weakness import weakness_chart
+from utils.listener_func.special_battle_npc_listener import special_battle_npc_listener, special_battle_npc_timer_listener
+
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
+UNOWN_NPC_NA_LINE = ":x: You can only challenge the **Alph Scientist** once every"
 
 triggers = {
     "bud_info_trigger": "**Level**:",
@@ -327,6 +330,30 @@ class MessageCreateListener(commands.Cog):
                 await monthly_stats_listener(
                     bot=self.bot, before_message=message, after_message=message
                 )
+        # ————————————————————————————————
+        # 🩵 Special Npc Listener
+        # ————————————————————————————————
+        if first_embed:
+            if (
+                first_embed.description
+                and "challenged <:alph_scientist:1504637214217470032> **Alph Scientist** to a battle!"
+                in first_embed.description
+            ):
+                pretty_log(
+                    "info",
+                    f"🔹 Matched Special Battle NPC Listener | message_id={message.id}",
+                )
+                await special_battle_npc_listener(bot=self.bot, message=message)
+        if content and UNOWN_NPC_NA_LINE in content:
+            pretty_log(
+                "info",
+                f"🔹 Matched Special Battle NPC Timer Listener for XMAS BLUE | message_id={message.id}",
+            )
+            await special_battle_npc_timer_listener(
+                bot=self.bot, message=message
+            )
+
+
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
 # 🟣────────────────────────────────────────────
