@@ -144,6 +144,7 @@ IGNORE_BATTLE_FOLLOWUP_LIST = [
     "Battle Palace",
     "Battle Tower",
     "Mega Chamber",
+    "Enemy ID: 970",
 ]
 
 
