@@ -4,6 +4,7 @@ import discord
 
 from constants.aesthetics import Thumbnails
 from constants.celestial_constants import (
+    CELESTIAL_ROLES,
     CELESTIAL_TEXT_CHANNELS,
     DEFAULT_EMBED_COLOR,
     MONTHLY_REQUIREMENT,
@@ -95,9 +96,23 @@ async def goal_checker(
                         user = await bot.fetch_user(user_id)
                     user_line = user.mention if user else user_name
                     avatar_url = user.display_avatar.url if user else None
+                    # Add cosmic catch goal role if user has met the requirement and doesn't have the role yet
+                    role = guild.get_role(CELESTIAL_ROLES.cosmic_catch_goal)
+                    member = guild.get_member(user_id)
+                    if member:
+                        if role and role not in member.roles:
+                            await member.add_roles(role)
+                            pretty_log(
+                                "info",
+                                f"Added Cosmic Catch Goal role to {user_name} ({user_id}) for meeting weekly goal.",
+                                label="💠 GOAL CHECKER",
+                                bot=bot,
+                            )
+                    role_str = f"- **Role Reward:** Cosmic Catch Goal" if role else ""
                     desc = (
                         f"- **Member:** {user_line}\n"
                         f"- **Goal:** {WEEKLY_REQUIREMENT:,} catches\n"
+                        f"{role_str}"
                     )
                     embed = discord.Embed(
                         title="🎉 Weekly Goal Achieved!",
@@ -121,6 +136,7 @@ async def goal_checker(
                         await channel.send(
                             f"🎉 Congratulations **{user_name}**! You have met the weekly requirement of {WEEKLY_REQUIREMENT:,}"
                         )
+
                 except Exception as e:
                     pretty_log(
                         "error",
@@ -180,7 +196,8 @@ async def goal_checker(
                             f"🏆 Congratulations **{user_name}**! You have met the monthly requirement of {MONTHLY_REQUIREMENT:,}"
                         )
                     pretty_log(
-                        f"Sent monthly requirement met webhook for user {user_name}."
+                        "info",
+                        f"Sent monthly requirement met webhook for user {user_name}.",
                     )
                 except Exception as e:
                     pretty_log(

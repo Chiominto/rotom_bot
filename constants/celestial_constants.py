@@ -111,6 +111,7 @@ class CELESTIAL_CATEGORIES:
 #       CELESTIAL_ROLES
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_ROLES:
+    cosmic_catch_goal = 1505715488469024970
     giveaways = 1493045397575438470
     _unknown = 1490876248577020086
     pokémeow = 1490117261824884991
