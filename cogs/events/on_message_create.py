@@ -6,30 +6,36 @@ from constants.celestial_constants import (
     CELESTIAL_TEXT_CHANNELS,
     POKEMEOW_APPLICATION_ID,
 )
-from utils.listener_func.monthly_stats_listener import monthly_stats_listener
-from utils.listener_func.weekly_stats_listener import weekly_stats_listener
+from utils.listener_func.battle_timer import detect_pokemeow_battle
+from utils.listener_func.battle_weakness import weakness_chart
+from utils.listener_func.berry_listener import berry_listener
+from utils.listener_func.berry_water_listener import (
+    handle_berry_water_message,
+    handle_mulch_message,
+)
 from utils.listener_func.bud_ev_listener import handle_pokemeow_embed_sync
+from utils.listener_func.egg_alert_listener import (
+    egg_hatched_listener,
+    egg_ready_to_hatch_listener,
+)
 from utils.listener_func.ev_tracker_listener import handle_pokemeow_battle_message
 from utils.listener_func.faction_ball_alert import faction_ball_alert
 from utils.listener_func.faction_ball_listener import (
     extract_faction_ball_from_daily,
     extract_faction_ball_from_fa,
 )
-from utils.listener_func.egg_alert_listener import egg_ready_to_hatch_listener, egg_hatched_listener
-from utils.logs.pretty_log import pretty_log
-from utils.listener_func.market_view_listener import market_view_listener
-from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
-from utils.listener_func.berry_listener import berry_listener
-from utils.listener_func.berry_water_listener import (
-    handle_berry_water_message,
-    handle_mulch_message,
-)
-from utils.listener_func.held_item_ping import held_item_ping_handler
-from utils.listener_func.pokemon_timer import detect_pokemeow_reply
 from utils.listener_func.fish_timer import fish_timer_handler
-from utils.listener_func.battle_timer import detect_pokemeow_battle
-from utils.listener_func.battle_weakness import weakness_chart
-from utils.listener_func.special_battle_npc_listener import special_battle_npc_listener, special_battle_npc_timer_listener
+from utils.listener_func.held_item_ping import held_item_ping_handler
+from utils.listener_func.market_view_listener import market_view_listener
+from utils.listener_func.monthly_stats_listener import monthly_stats_listener
+from utils.listener_func.pokemon_timer import detect_pokemeow_reply
+from utils.listener_func.special_battle_npc_listener import (
+    special_battle_npc_listener,
+    special_battle_npc_timer_listener,
+)
+from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
+from utils.listener_func.weekly_stats_listener import weekly_stats_listener
+from utils.logs.pretty_log import pretty_log
 
 FACTIONS = ["aqua", "flare", "galactic", "magma", "plasma", "rocket", "skull", "yell"]
 UNOWN_NPC_NA_LINE = ":x: You can only challenge the **Alph Scientist** once every"
@@ -48,6 +54,9 @@ triggers = {
 class MessageCreateListener(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.processed_stats_messages = (
+            set()
+        )  # Track processed weekly/monthly stats messages to prevent duplicates
 
     # 🟣────────────────────────────────────────────
     #         💤 Message Listener Event
@@ -209,10 +218,7 @@ class MessageCreateListener(commands.Cog):
         # ⚡ Egg Hatched LISTENER
         # ————————————————————————————————
         if first_embed:
-            if (
-                first_embed_footer
-                and "PokeMeow | Egg Hatch" in first_embed.footer.text
-            ):
+            if first_embed_footer and "PokeMeow | Egg Hatch" in first_embed.footer.text:
                 pretty_log(
                     "info",
                     f"🔹 Matched Egg Hatched Listener | message_id={message.id}",
@@ -273,16 +279,11 @@ class MessageCreateListener(commands.Cog):
                     in first_embed_description
                     and ";wb fight" in first_embed_description
                 ):
-                    await register_wb_battle_reminder(
-                        bot=self.bot, message=message
-                    )
+                    await register_wb_battle_reminder(bot=self.bot, message=message)
         # ————————————————————————————————
         # ⚡ Held Item Ping Listener
         # ————————————————————————————————
-        if (
-            first_embed_description
-            and "<:held_item:" in first_embed_description
-        ):
+        if first_embed_description and "<:held_item:" in first_embed_description:
             pretty_log(
                 "info",
                 f"Detected potential held item spawn in message {message.id}, processing for held item pings...",
@@ -309,27 +310,43 @@ class MessageCreateListener(commands.Cog):
         # ————————————————————————————————
         if first_embed:
             if triggers["weekly_stats_command"] in first_embed_title:
-                pretty_log(
-                    "info",
-                    f"Detected weekly stats embed from PokéMeow bot: Message ID {message.id}",
-                    label="Weekly Stats Listener",
-                )
-                await weekly_stats_listener(
-                    bot=self.bot, before_message=message, after_message=message
-                )
+                if message.id not in self.processed_stats_messages:
+                    pretty_log(
+                        "info",
+                        f"Detected weekly stats embed from PokéMeow bot: Message ID {message.id}",
+                        label="Weekly Stats Listener",
+                    )
+                    await weekly_stats_listener(
+                        bot=self.bot, before_message=message, after_message=message
+                    )
+                    self.processed_stats_messages.add(message.id)
+                else:
+                    pretty_log(
+                        "debug",
+                        f"Skipping already-processed weekly stats message ID {message.id}",
+                        label="Weekly Stats Listener",
+                    )
         # ————————————————————————————————
         # 🩵 Monthly Stats Listener
         # ————————————————————————————————
         if first_embed:
             if triggers["monthly_stats_command"] in first_embed_title:
-                pretty_log(
-                    "info",
-                    f"Detected monthly stats embed from PokéMeow bot: Message ID {message.id}",
-                    label="Monthly Stats Listener",
-                )
-                await monthly_stats_listener(
-                    bot=self.bot, before_message=message, after_message=message
-                )
+                if message.id not in self.processed_stats_messages:
+                    pretty_log(
+                        "info",
+                        f"Detected monthly stats embed from PokéMeow bot: Message ID {message.id}",
+                        label="Monthly Stats Listener",
+                    )
+                    await monthly_stats_listener(
+                        bot=self.bot, before_message=message, after_message=message
+                    )
+                    self.processed_stats_messages.add(message.id)
+                else:
+                    pretty_log(
+                        "debug",
+                        f"Skipping already-processed monthly stats message ID {message.id}",
+                        label="Monthly Stats Listener",
+                    )
         # ————————————————————————————————
         # 🩵 Special Npc Listener
         # ————————————————————————————————
@@ -349,9 +366,7 @@ class MessageCreateListener(commands.Cog):
                 "info",
                 f"🔹 Matched Special Battle NPC Timer Listener for XMAS BLUE | message_id={message.id}",
             )
-            await special_battle_npc_timer_listener(
-                bot=self.bot, message=message
-            )
+            await special_battle_npc_timer_listener(bot=self.bot, message=message)
 
 
 # 🟣────────────────────────────────────────────
