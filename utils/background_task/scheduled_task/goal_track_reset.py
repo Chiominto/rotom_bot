@@ -2,11 +2,14 @@ import discord
 
 from constants.celestial_constants import (
     CELESTIAL_TEXT_CHANNELS,
+    CELESTIALS_SERVER_ID,
     DEFAULT_EMBED_COLOR,
     MONTHLY_REQUIREMENT,
     WEEKLY_REQUIREMENT,
-    CELESTIALS_SERVER_ID
 )
+from utils.cache.cache_list import monthly_goal_cache, weekly_goal_cache
+from utils.cache.monthly_goal_tracker_cache import monthly_goal_cache_dirty
+from utils.cache.weekly_goal_tracker_cache import weekly_goal_cache_dirty
 from utils.db.monthly_goal_tracker import delete_all_monthly_goals
 from utils.db.weekly_goal_tracker import delete_all_weekly_goals
 from utils.logs.pretty_log import pretty_log
@@ -23,6 +26,9 @@ async def weekly_goal_track_reset(bot):
     """Resets the weekly goal tracker data."""
     try:
         await delete_all_weekly_goals(bot)
+        # Keep runtime state aligned with DB reset to allow fresh weekly announcements.
+        weekly_goal_cache.clear()
+        weekly_goal_cache_dirty.clear()
         pretty_log(
             tag="background_task",
             message="Weekly goal tracker data has been reset.",
@@ -50,6 +56,9 @@ async def monthly_goal_track_reset(bot):
     """Resets the monthly goal tracker data."""
     try:
         await delete_all_monthly_goals(bot)
+        # Keep runtime state aligned with DB reset to allow fresh monthly announcements.
+        monthly_goal_cache.clear()
+        monthly_goal_cache_dirty.clear()
         pretty_log(
             tag="background_task",
             message="Monthly goal tracker data has been reset.",
