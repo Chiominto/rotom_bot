@@ -10,18 +10,16 @@ from constants.celestial_constants import (
 )
 from utils.cache.cache_list import (
     celestial_members_cache,
+    monthly_goal_cache,
     processed_monthly_stats_messages,
 )
-from utils.db.monthly_goal_tracker import fetch_all_monthly_goals, upsert_monthly_goal
-from utils.db.weekly_goal_tracker import fetch_all_weekly_goals, upsert_weekly_goal
+from utils.db.monthly_goal_tracker import upsert_monthly_goal
+from utils.db.weekly_goal_tracker import upsert_weekly_goal
 from utils.functions.get_pokemeow_reply import (
     get_message_interaction_member,
     get_pokemeow_reply,
 )
-from utils.functions.stats_parsers import (
-    parse_clan_stats_message,
-    split_known_and_unknown_members,
-)
+from utils.functions.stats_parsers import parse_clan_stats_message
 from utils.logs.pretty_log import pretty_log
 
 from .pokemon_caught_listener import goal_checker
@@ -128,48 +126,53 @@ async def monthly_stats_listener(
     if not clan_members_stats:
         return
 
-    # Fetch old weekly goals from DB
+    # Resolve member IDs from parsed stats names
     from utils.cache.celestial_members_cache import (
         fetch_user_id_by_user_name_or_pokemeow_name_cache,
     )
 
-    old_monthly_goals = await fetch_all_monthly_goals(bot=bot)
-    # Convert list of dicts to dict keyed by user_id for fast lookup
-    old_monthly_goals_dict = {g["user_id"]: g for g in old_monthly_goals}
-    if not old_monthly_goals:
-        # Upsert all members as new if no old goals found
-        for username, catches, fishes in clan_members_stats:
-            # Manually set member_id for this user before anything else
-            if username == "neverlikenever_42984":
-                member_id = 1327864338018730044
-            else:
-                member_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
-            if member_id is None:
-                pretty_log(
-                    "info",
-                    f"[MONTHLY STATS] Skipping upsert: Could not resolve user_id for username '{username}'",
-                    label="💥 MONTHLY STATS USER_ID NULL",
-                    bot=bot,
-                )
-                continue
-            member_info = celestial_members_cache.get(member_id)
-            channel_id = member_info.get("channel_id") if member_info else None
-            # Preserve existing requirement mark if user is already in cache
-            from utils.cache.cache_list import monthly_goal_cache
-
-            existing_mark = monthly_goal_cache.get(member_id, {}).get(
-                "monthly_requirement_mark", False
-            )
-            await upsert_monthly_goal(
+    upserts_count = 0
+    goal_checks_count = 0
+    for username, catches, fishes in clan_members_stats:
+        # Manually set member_id for this user before anything else
+        if username == "neverlikenever_42984":
+            member_id = 1327864338018730044
+        else:
+            member_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
+        if member_id is None:
+            pretty_log(
+                "info",
+                f"[MONTHLY STATS] Skipping upsert: Could not resolve user_id for username '{username}'",
+                label="💥 MONTHLY STATS USER_ID NULL",
                 bot=bot,
-                user_id=member_id,
-                user_name=username,
-                channel_id=channel_id,
-                pokemon_caught=catches,
-                fish_caught=fishes,
-                battles_won=0,
-                monthly_requirement_mark=existing_mark,
             )
+            continue
+
+        member_info = celestial_members_cache.get(member_id)
+        channel_id = member_info.get("channel_id") if member_info else None
+        # Keep mark state so already-announced users don't get duplicate posts.
+        existing_mark = monthly_goal_cache.get(member_id, {}).get(
+            "monthly_requirement_mark", False
+        )
+        await upsert_monthly_goal(
+            bot=bot,
+            user_id=member_id,
+            user_name=username,
+            channel_id=channel_id,
+            pokemon_caught=catches,
+            fish_caught=fishes,
+            battles_won=0,
+            monthly_requirement_mark=existing_mark,
+        )
+        upserts_count += 1
+
+        # Run goal checks for anyone meeting the monthly threshold on this page.
+        total_catches = catches + fishes
+        if (
+            catches >= MONTHLY_REQUIREMENT
+            or fishes >= MONTHLY_REQUIREMENT
+            or total_catches >= MONTHLY_REQUIREMENT
+        ):
             await goal_checker(
                 bot=bot,
                 user_id=member_id,
@@ -178,48 +181,11 @@ async def monthly_stats_listener(
                 context="stats_command",
                 guild=guild,
             )
-    else:
-        # Compare values
-        for username, catches, fishes in clan_members_stats:
-            member_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
-            if member_id is None:
-                pretty_log(
-                    "info",
-                    f"[MONTHLY STATS] Skipping upsert: Could not resolve user_id for username '{username}'",
-                    label="💥 MONTHLY STATS USER_ID NULL",
-                    bot=bot,
-                )
-                continue
-            # Compare from old weekly goals from db
-            old_goal = old_monthly_goals_dict.get(member_id)
-            old_catches = old_goal.get("pokemon_caught") if old_goal else 0
-            old_fishes = old_goal.get("fish_caught") if old_goal else 0
-            if catches != old_catches or fishes != old_fishes:
-                member_info = (
-                    celestial_members_cache.get(member_id) if member_id else None
-                )
-                channel_id = member_info.get("channel_id") if member_info else None
-                # Preserve existing requirement mark to avoid resetting if goal_checker already set it true
-                from utils.cache.cache_list import monthly_goal_cache
+            goal_checks_count += 1
 
-                existing_mark = monthly_goal_cache.get(member_id, {}).get(
-                    "monthly_requirement_mark", False
-                )
-                await upsert_monthly_goal(
-                    bot=bot,
-                    user_id=member_id,
-                    user_name=username,
-                    channel_id=channel_id,
-                    pokemon_caught=catches,
-                    fish_caught=fishes,
-                    battles_won=0,
-                    monthly_requirement_mark=existing_mark,
-                )
-                await goal_checker(
-                    bot=bot,
-                    user_id=member_id,
-                    user_name=username,
-                    channel=after_message.channel,
-                    context="stats_command",
-                    guild=guild,
-                )
+    pretty_log(
+        "info",
+        f"Monthly stats processed page {current_page}: upserts={upserts_count}, goal_checks={goal_checks_count}.",
+        label="💠 MONTHLY STATS DEBUG",
+        bot=bot,
+    )

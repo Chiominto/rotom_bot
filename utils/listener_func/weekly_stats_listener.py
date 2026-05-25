@@ -11,9 +11,10 @@ from constants.celestial_constants import (
 from utils.cache.cache_list import (
     celestial_members_cache,
     processed_weekly_stats_messages,
+    weekly_goal_cache,
 )
 from utils.db.monthly_goal_tracker import upsert_monthly_goal
-from utils.db.weekly_goal_tracker import fetch_all_weekly_goals, upsert_weekly_goal
+from utils.db.weekly_goal_tracker import upsert_weekly_goal
 from utils.functions.get_pokemeow_reply import (
     get_message_interaction_member,
     get_pokemeow_reply,
@@ -27,7 +28,7 @@ from utils.logs.pretty_log import pretty_log
 
 from .pokemon_caught_listener import goal_checker
 
-#enable_debug(f"{__name__}.weekly_stats_listener")
+# enable_debug(f"{__name__}.weekly_stats_listener")
 
 
 def extract_current_page_number(footer_text: str) -> int | None:
@@ -85,11 +86,7 @@ async def weekly_stats_listener(
     debug_log(f"Queued message/page key as processed: {key}")
 
     # Check if command user is in monthly and weekly goal caches
-    from utils.cache.cache_list import (
-        celestial_members_cache,
-        monthly_goal_cache,
-        weekly_goal_cache,
-    )
+    from utils.cache.cache_list import celestial_members_cache, monthly_goal_cache
 
     clan_member_info = celestial_members_cache.get(command_user_id)
     personal_channel_id = (
@@ -170,139 +167,67 @@ async def weekly_stats_listener(
         debug_log("No clan member stats parsed from embed description. Exiting.")
         return
 
-    # Fetch old weekly goals from DB
+    # Resolve member IDs from parsed stats names
     from utils.cache.celestial_members_cache import (
         fetch_user_id_by_user_name_or_pokemeow_name_cache,
     )
 
-    old_weekly_goals = await fetch_all_weekly_goals(bot=bot)
-    # Convert list of dicts to dict keyed by user_id for fast lookup
-    old_weekly_goals_dict = {g["user_id"]: g for g in old_weekly_goals}
-    debug_log(f"Fetched old weekly goals count: {len(old_weekly_goals)}")
-    if not old_weekly_goals:
-        debug_log("No existing weekly goals found. Entering initial upsert path.")
-        # Upsert both known and unknown members
-        for username, catches, fishes in clan_members_stats:
-            debug_log(
-                f"Initial upsert candidate: username={username}, catches={catches}, fishes={fishes}"
-            )
-            # Manually set member_id for this user before anything else
-            if username == "neverlikenever_42984":
-                member_id = 1327864338018730044
-                debug_log(f"Manually resolved member_id for {username}: {member_id}")
-            else:
-                member_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
-                debug_log(f"Resolved member_id for {username}: {member_id}")
-            if member_id is None:
-                pretty_log(
-                    "info",
-                    f"[WEEKLY STATS] Skipping upsert: Could not resolve user_id for username '{username}'",
-                    label="💥 WEEKLY STATS USER_ID NULL",
-                    bot=bot,
-                )
-                continue
-            debug_log(f"Resolved member_id for {username}: {member_id}")
-            member_info = celestial_members_cache.get(member_id)
-            channel_id = member_info.get("channel_id") if member_info else None
-            # Preserve existing requirement mark if user is already in cache
-            existing_mark = weekly_goal_cache.get(member_id, {}).get(
-                "weekly_requirement_mark", False
-            )
-            await upsert_weekly_goal(
+    upserts_count = 0
+    goal_checks_count = 0
+    for username, catches, fishes in clan_members_stats:
+        # Manually set member_id for this user before anything else
+        if username == "neverlikenever_42984":
+            member_id = 1327864338018730044
+        else:
+            member_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
+        if member_id is None:
+            pretty_log(
+                "info",
+                f"[WEEKLY STATS] Skipping upsert: Could not resolve user_id for username '{username}'",
+                label="💥 WEEKLY STATS USER_ID NULL",
                 bot=bot,
-                user_id=member_id,
-                user_name=username,
-                channel_id=channel_id,
-                pokemon_caught=catches,
-                fish_caught=fishes,
-                battles_won=0,
-                weekly_requirement_mark=existing_mark,
             )
-            debug_log(
-                f"Upserted initial weekly goal for {username} ({member_id}): catches={catches}, fishes={fishes}, channel_id={channel_id}, mark={existing_mark}"
-            )
+            continue
+
+        member_info = celestial_members_cache.get(member_id)
+        channel_id = member_info.get("channel_id") if member_info else None
+        # Keep mark state so already-announced users don't get duplicate posts.
+        existing_mark = weekly_goal_cache.get(member_id, {}).get(
+            "weekly_requirement_mark", False
+        )
+        await upsert_weekly_goal(
+            bot=bot,
+            user_id=member_id,
+            user_name=username,
+            channel_id=channel_id,
+            pokemon_caught=catches,
+            fish_caught=fishes,
+            battles_won=0,
+            weekly_requirement_mark=existing_mark,
+        )
+        upserts_count += 1
+
+        # Run goal checks for anyone meeting the weekly threshold on this page.
+        total_catches = catches + fishes
+        if (
+            catches >= WEEKLY_REQUIREMENT
+            or fishes >= WEEKLY_REQUIREMENT
+            or total_catches >= WEEKLY_REQUIREMENT
+        ):
             await goal_checker(
                 bot=bot,
                 user_id=member_id,
                 user_name=username,
                 channel=after_message.channel,
+                top_line_weekly_catches=catches,
                 context="stats_command",
                 guild=guild,
             )
-            debug_log(
-                f"Ran goal_checker for {username} ({member_id}) after initial upsert."
-            )
-    else:
-        debug_log("Existing weekly goals found. Entering delta update path.")
-        changes_detected = 0
-        # Compare values
-        for username, catches, fishes in clan_members_stats:
-            member_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
-            if member_id is None:
-                pretty_log(
-                    "info",
-                    f"[WEEKLY STATS] Skipping upsert: Could not resolve user_id for username '{username}'",
-                    label="💥 WEEKLY STATS USER_ID NULL",
-                    bot=bot,
-                )
-                continue
-            # Compare from old weekly goals from db
-            old_goal = old_weekly_goals_dict.get(member_id) if member_id else None
-            old_catches = old_goal.get("pokemon_caught") if old_goal else 0
-            old_fishes = old_goal.get("fish_caught") if old_goal else 0
-            debug_log(
-                f"Weekly delta check for {username} ({member_id}): old=({old_catches},{old_fishes}), new=({catches},{fishes})"
-            )
-            if catches != old_catches or fishes != old_fishes:
-                changes_detected += 1
-                member_info = (
-                    celestial_members_cache.get(member_id) if member_id else None
-                )
-                channel_id = member_info.get("channel_id") if member_info else None
-                # Preserve existing requirement mark to avoid resetting if goal_checker already set it true
-                existing_mark = weekly_goal_cache.get(member_id, {}).get(
-                    "weekly_requirement_mark", False
-                )
-                debug_log(
-                    f"Detected weekly stats change for {username} ({member_id}). Upserting and running goal_checker."
-                )
-                await upsert_weekly_goal(
-                    bot=bot,
-                    user_id=member_id,
-                    user_name=username,
-                    channel_id=channel_id,
-                    pokemon_caught=catches,
-                    fish_caught=fishes,
-                    battles_won=0,
-                    weekly_requirement_mark=existing_mark,
-                )
-                debug_log(
-                    f"Upserted updated weekly goal for {username} ({member_id}): catches={catches}, fishes={fishes}, channel_id={channel_id}, mark={existing_mark}"
-                )
-                await goal_checker(
-                    bot=bot,
-                    user_id=member_id,
-                    user_name=username,
-                    channel=after_message.channel,
-                    top_line_weekly_catches=catches,
-                    context="stats_command",
-                    guild=guild,
-                )
-                debug_log(
-                    f"Ran goal_checker for {username} ({member_id}) after detected change."
-                )
-        if changes_detected == 0:
-            pretty_log(
-                "info",
-                "No changes detected in weekly goals compared to the database.",
-                label="💠 WEEKLY STATS DEBUG",
-                bot=bot,
-            )
-            debug_log("Delta update path complete: no weekly stat changes detected.")
-        else:
-            debug_log(
-                f"Delta update path complete: updated {changes_detected} member(s)."
-            )
+            goal_checks_count += 1
+
+    debug_log(
+        f"Weekly stats upserts complete: upserts={upserts_count}, goal_checks={goal_checks_count}, page={current_page}"
+    )
     pretty_log(
         "info",
         f"Weekly stats listener processed message ID {after_message.id} for page {current_page}.",
