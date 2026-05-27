@@ -92,7 +92,7 @@ async def fish_timer_handler(message: discord.Message):
 
                 if setting == "on":
                     content = f"{FISH_TIMER_EMOJI} {member.mention}, your </fish spawn:1015311084812501026> command is ready! "
-                elif setting == "on_no_pings":
+                elif setting in ("on_no_pings", "on w/o pings"):
                     content = f"{FISH_TIMER_EMOJI} **{member.name}**, your </fish spawn:1015311084812501026> command is ready!"
                 else:
                     return

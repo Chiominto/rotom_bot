@@ -349,7 +349,9 @@ class TimerSettingsView(discord.ui.View):
     # 💫────────────────────────────────────
     def update_buttons_styles(self):
         # Update Pokemon button style (4 States)
-        pokemon_state = str(self.pokemon_setting) if self.pokemon_setting else "off"
+        pokemon_state = (
+            str(self.pokemon_setting).lower() if self.pokemon_setting else "off"
+        )
 
         if pokemon_state == "off":
             self.pokemon_button.style = ButtonStyle.secondary
@@ -368,7 +370,7 @@ class TimerSettingsView(discord.ui.View):
             self.pokemon_button.label = "Pokemon Timer: Off"
 
         # Update Fish button style (3 States)
-        fish_state = str(self.fish_setting) if self.fish_setting else "off"
+        fish_state = str(self.fish_setting).lower() if self.fish_setting else "off"
         if fish_state == "off":
             self.fish_button.style = ButtonStyle.secondary
             self.fish_button.label = "Fish Timer: Off"
@@ -383,7 +385,9 @@ class TimerSettingsView(discord.ui.View):
             self.fish_button.label = "Fish Timer: Off"
 
         # Update Battle button style (3 States)
-        battle_state = str(self.battle_setting) if self.battle_setting else "off"
+        battle_state = (
+            str(self.battle_setting).lower() if self.battle_setting else "off"
+        )
         if battle_state == "off":
             self.battle_button.style = ButtonStyle.secondary
             self.battle_button.label = "Battle Timer: Off"

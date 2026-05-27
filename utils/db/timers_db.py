@@ -17,12 +17,10 @@ from utils.logs.pretty_log import pretty_log
 async def fetch_all_timers(bot: discord.Client):
     try:
         async with bot.pg_pool.acquire() as conn:
-            rows = await conn.fetch(
-                """
+            rows = await conn.fetch("""
                 SELECT user_id, user_name, pokemon_setting, fish_setting, battle_setting
                 FROM timers
-                """
-            )
+                """)
             timers = [
                 {
                     "user_id": row["user_id"],
@@ -208,9 +206,26 @@ async def update_battle_setting(
                 tag="db",
             )
             # Also update the cache
+            from utils.cache.cache_list import (
+                battle_timer_users_cache,
+                not_battle_timer_user_cache,
+                timer_cache,
+            )
             from utils.cache.timers_cache import update_battle_timer_setting
 
             update_battle_timer_setting(user_id, battle_setting)
+
+            user_name = (timer_cache.get(user_id) or {}).get("user_name")
+            if user_name:
+                cache_key = user_name.strip().lower()
+                normalized_setting = (battle_setting or "off").lower()
+
+                if normalized_setting == "off":
+                    battle_timer_users_cache.pop(cache_key, None)
+                    not_battle_timer_user_cache.add(cache_key)
+                else:
+                    battle_timer_users_cache[cache_key] = normalized_setting
+                    not_battle_timer_user_cache.discard(cache_key)
 
     except Exception as e:
         pretty_log(

@@ -1,19 +1,21 @@
 import asyncio
 import re
 from typing import Optional
-from utils.db.utilities_db import upsert_utility_setting
+
 import discord
 from discord.ext import commands
-from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache
+
 from constants.aesthetics import *
-from constants.celestial_constants import POKEMEOW_APPLICATION_ID, DEFAULT_EMBED_COLOR
-from utils.cache.cache_list import (
-    timer_cache,
-)
+from constants.celestial_constants import DEFAULT_EMBED_COLOR, POKEMEOW_APPLICATION_ID
+from utils.cache.cache_list import timer_cache
+from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache
+from utils.db.utilities_db import upsert_utility_setting
+from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
-from utils.functions.retry_function import _retry_discord_call
+
 from .pokemon_caught_listener import phone_copy_description
+
 battle_ready_tasks = {}
 FOLLOWUP_REJECT_LOG_COOLDOWN_SECONDS = 10.0
 followup_reject_log_cache: dict[str, float] = {}
@@ -165,6 +167,10 @@ def _normalize_challenge_name(raw_name: str) -> str:
     name = re.sub(r"^(?:<a?:\w+:\d+>\s*)+", "", name)
     name = re.sub(r"^[^\w]+", "", name)
     return name.strip()
+
+
+def _battle_cache_key(name: str) -> str:
+    return (name or "").strip().lower()
 
 
 def _parse_challenge_names(description: str) -> Optional[tuple[str, str]]:
@@ -359,7 +365,7 @@ async def _send_battle_ready_notification(
             content=f"{BATTLE_TIMER_EMOJI} {challenger.mention}, your </battle:1015311084422434819> command is ready!",
             embed=battle_embed,
         )
-                    # Upsert phone setting to db if there is no entry yet and set it to iphone by default
+        # Upsert phone setting to db if there is no entry yet and set it to iphone by default
         if fetch_user_utility_type_setting_cache(challenger.id, "phone") is None:
             await upsert_utility_setting(
                 bot, challenger.id, challenger.name, "phone", "iphone"
@@ -420,10 +426,15 @@ async def detect_pokemeow_battle(bot: commands.Bot, message: discord.Message):
                 f"| description={compact_description}",
             )
             return
-        from utils.cache.cache_list import not_battle_timer_user_cache, battle_timer_users_cache
+        from utils.cache.cache_list import (
+            battle_timer_users_cache,
+            not_battle_timer_user_cache,
+        )
+
         challenger_name, opponent_name = parsed_names
+        challenger_cache_key = _battle_cache_key(challenger_name)
         debug_log(f"Parsed challenger={challenger_name}, opponent={opponent_name}")
-        if challenger_name in not_battle_timer_user_cache:
+        if challenger_cache_key in not_battle_timer_user_cache:
             debug_log(
                 f"Challenger {challenger_name} is in not_battle_timer_user_cache; skipping"
             )
@@ -436,7 +447,7 @@ async def detect_pokemeow_battle(bot: commands.Bot, message: discord.Message):
         challenger: Optional[discord.Member] = None
 
         # Check if challenger has battle timer enabled before doing expensive operations
-        if challenger_name not in battle_timer_users_cache:
+        if challenger_cache_key not in battle_timer_users_cache:
             challenger = _find_member_by_name(message.guild, challenger_name)
             if not challenger:
                 debug_log("Could not match challenger to guild member")
@@ -445,11 +456,11 @@ async def detect_pokemeow_battle(bot: commands.Bot, message: discord.Message):
             user_settings = timer_cache.get(challenger.id)
             if not user_settings:
                 debug_log("No timer settings found for challenger")
-                if challenger_name not in not_battle_timer_user_cache:
+                if challenger_cache_key not in not_battle_timer_user_cache:
                     debug_log(
                         f"Adding {challenger_name} to not_battle_timer_user_cache"
                     )
-                    not_battle_timer_user_cache.add(challenger_name)
+                    not_battle_timer_user_cache.add(challenger_cache_key)
                     pretty_log(
                         tag="cache",
                         message=f"Added {challenger_name} to not_battle_timer_user_cache due to missing timer settings",
@@ -457,14 +468,24 @@ async def detect_pokemeow_battle(bot: commands.Bot, message: discord.Message):
                 return
 
             setting = (user_settings.get("battle_setting") or "off").lower()
+            if setting == "off":
+                battle_timer_users_cache.pop(challenger_cache_key, None)
+                not_battle_timer_user_cache.add(challenger_cache_key)
+            else:
+                battle_timer_users_cache[challenger_cache_key] = setting
+                not_battle_timer_user_cache.discard(challenger_cache_key)
         else:
-            setting = battle_timer_users_cache.get(challenger_name, "off").lower()
+            setting = battle_timer_users_cache.get(challenger_cache_key, "off").lower()
 
         if setting == "off":
             debug_log("Battle timer is disabled for this user")
             debug_log(f"Adding {challenger_name} to not_battle_timer_user_cache")
-            not_battle_timer_user_cache.add(challenger_name)
+            battle_timer_users_cache.pop(challenger_cache_key, None)
+            not_battle_timer_user_cache.add(challenger_cache_key)
             return
+
+        not_battle_timer_user_cache.discard(challenger_cache_key)
+        battle_timer_users_cache[challenger_cache_key] = setting
 
         if challenger is None:
             challenger = _find_member_by_name(message.guild, challenger_name)

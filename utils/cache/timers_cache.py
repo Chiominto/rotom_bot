@@ -28,19 +28,22 @@ async def load_timer_cache(bot):
     pretty_log(
         message=f"Loaded {len(timer_cache)} users' timer settings into cache",
         tag="cache",
-
     )
 
     return timer_cache
+
 
 def fetch_id_by_user_name(user_name: str):
     """
     Fetch a user ID from the timer cache based on the user name.
     """
+    normalized_name = (user_name or "").strip().lower()
     for user_id, settings in timer_cache.items():
-        if settings.get("user_name") == user_name:
+        cached_name = (settings.get("user_name") or "").strip().lower()
+        if cached_name == normalized_name:
             return user_id
     return None
+
 
 def upsert_timer_cache(
     user_id: int,
@@ -63,6 +66,7 @@ def upsert_timer_cache(
         tag="cache",
     )
 
+
 def update_pokemon_timer_setting(
     user_id: int,
     pokemon_setting: str,
@@ -76,6 +80,7 @@ def update_pokemon_timer_setting(
             message=f"Updated pokemon_setting for user_id: {user_id} in cache",
             tag="cache",
         )
+
 
 def update_fish_timer_setting(
     user_id: int,
@@ -91,6 +96,7 @@ def update_fish_timer_setting(
             tag="cache",
         )
 
+
 def update_battle_timer_setting(
     user_id: int,
     battle_setting: str,
@@ -104,6 +110,7 @@ def update_battle_timer_setting(
             message=f"Updated battle_setting for user_id: {user_id} in cache",
             tag="cache",
         )
+
 
 def remove_user_from_timer_cache(user_id: int):
     """
