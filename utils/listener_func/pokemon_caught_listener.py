@@ -427,7 +427,14 @@ async def pokemon_caught_goal_processer(
         await check_pokemeow_name(bot, member, pokemeow_name)
 
 
-def phone_copy_description(text: str, setting: str):
+def phone_copy_description(text: str, setting: str = None, member_id: int = None):
+    if setting is None:
+        if member_id is not None:
+            setting = (
+                fetch_user_utility_type_setting_cache(member_id, "phone") or "iphone"
+            )
+        else:
+            setting = "iphone"
     if setting == "iphone":
         new_text = f"`{text}`"  # Wrap in code block for iPhone formatting
     elif setting == "android":

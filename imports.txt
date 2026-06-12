@@ -27,3 +27,4 @@ from utils.essentials.format import format_comma_pokecoins
 from utils.functions.command_safe import run_command_safe
 
 from constants.celestial_constants import *
+from utils.listener_func.pokemon_caught_listener import phone_copy_description

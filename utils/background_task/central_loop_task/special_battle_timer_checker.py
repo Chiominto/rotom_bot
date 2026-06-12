@@ -5,7 +5,7 @@ from utils.db.special_npc_timer_db_func import (
     fetch_due_special_battle_timers,
     remove_special_battle_timer,
 )
-
+from utils.listener_func.pokemon_caught_listener import phone_copy_description
 from utils.functions.retry_function import _retry_discord_call
 from utils.logs.pretty_log import pretty_log
 
@@ -57,6 +57,7 @@ async def special_battle_timer_checker(bot: discord.Client):
                 content = f"{Emojis.Shuckle} {member.mention}, you can now battle {display_npc_name} again!"
                 npc_id = NPC_ID_MAP.get(npc_name, npc_name)
                 desc = f";b npc {npc_id}"
+                desc = phone_copy_description(text=desc, member_id=user_id)
                 embed = discord.Embed(description=desc, color=0xC1B1A5)
                 try:
                     await _retry_discord_call(

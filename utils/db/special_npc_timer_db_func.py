@@ -1,5 +1,6 @@
 from utils.logs.pretty_log import pretty_log
 
+
 # Add or update a special battle timer (upsert)
 async def upsert_special_battle_timer(
     bot, user_id: int, user_name: str, npc_name: str, ends_on: int, channel_id: int
