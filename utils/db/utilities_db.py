@@ -117,6 +117,39 @@ async def fetch_utility_type_settings(bot: discord.Client, utility_type: str):
         )
         return []
 
+async def fetch_phone_utility_setting(bot: discord.Client, user_id: int) -> str | None:
+    try:
+        async with bot.pg_pool.acquire() as conn:
+            row = await conn.fetchrow(
+                """
+                SELECT setting
+                FROM utilities
+                WHERE user_id = $1 AND utility_type = 'phone'
+                """,
+                user_id,
+            )
+            if row:
+                pretty_log(
+                    "db",
+                    f"Fetched phone utility setting for user_id: {user_id}",
+                    bot=bot,
+                )
+                return row["setting"]
+            else:
+                pretty_log(
+                    "db",
+                    f"No phone utility setting found for user_id: {user_id}",
+                    bot=bot,
+                )
+                return None
+    except Exception as e:
+        pretty_log(
+            "error",
+            f"Failed to fetch phone utility setting for user_id: {user_id} - {e}",
+            bot=bot,
+        )
+        return None
+
 async def fetch_all_utility_settings(bot: discord.Client):
     try:
         async with bot.pg_pool.acquire() as conn:
@@ -165,4 +198,3 @@ async def update_user_name(bot: discord.Client, user_id: int, new_user_name: str
             bot=bot,
         )
 
-        

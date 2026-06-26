@@ -483,7 +483,7 @@ async def pokemon_caught_listener(
     member_name = member.name
     # Plume fossil alert
     if (
-        ":plume_fossil" in embed_description
+        ":jaw_fossil" in embed_description
         and member_id in research_fossil_alert_cache
     ):
         phone_setting = (
@@ -493,7 +493,7 @@ async def pokemon_caught_listener(
         notify = str(user_data.get("notify", "off")).lower()  # ✅ CORRECT!
 
         if notify == "on" or notify == "on_no_pings":
-            command_text = ";res ex plume_fossil"
+            command_text = ";res ex jaw_fossil"
             command_text = phone_copy_description(command_text, phone_setting)
             if notify == "on":
                 # Send ping alert
