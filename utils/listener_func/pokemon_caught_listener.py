@@ -481,7 +481,7 @@ async def pokemon_caught_listener(
 
     member_id = member.id
     member_name = member.name
-    # Plume fossil alert
+    # Jaw fossil alert
     if (
         ":jaw_fossil" in embed_description
         and member_id in research_fossil_alert_cache
@@ -497,10 +497,10 @@ async def pokemon_caught_listener(
             command_text = phone_copy_description(command_text, phone_setting)
             if notify == "on":
                 # Send ping alert
-                content = f"{member.mention}, Oh a plume fossil! Don't forget to do the command"
+                content = f"{member.mention}, Oh a jaw fossil! Don't forget to do the command"
             elif notify == "on_no_pings":
                 # Send non-ping alert
-                content = f"**{member.name}**, Oh a plume fossil! Don't forget to do the command"
+                content = f"**{member.name}**, Oh a jaw fossil! Don't forget to do the command"
 
             embed_msg = discord.Embed(
                 description=command_text, color=DEFAULT_EMBED_COLOR
@@ -511,7 +511,7 @@ async def pokemon_caught_listener(
             )
             pretty_log(
                 "info",
-                f"Sent Plume Fossil alert to {member_name} ({member_id})",
+                f"Sent Jaw Fossil alert to {member_name} ({member_id})",
                 label="🦴 RESEARCH FOSSILS ALERT",
                 bot=bot,
             )
