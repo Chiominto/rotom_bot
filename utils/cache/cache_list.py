@@ -183,6 +183,11 @@ celestial_members_cache: dict[int, dict] = {}
 # }
 
 # 🧩────────────────────────────────────────────
+#        ⚡ Username List Cache
+# 🧩────────────────────────────────────────────
+timer_users: dict[str, int] = {}
+# user_name : user_id
+# 🧩────────────────────────────────────────────
 #        ⚡ Timers Cache
 # 🧩────────────────────────────────────────────
 timer_cache: dict[int, dict[str, str]] = {}

@@ -7,10 +7,10 @@ from discord.ext import commands
 
 from constants.aesthetics import *
 from constants.celestial_constants import POKEMEOW_APPLICATION_ID
-from utils.cache.cache_list import timer_cache  # 💜 import your cache
+from utils.cache.cache_list import timer_cache, timer_users  # 💜 import your cache
+from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
-from utils.functions.retry_function import _retry_discord_call
 
 # enable_debug(f"{__name__}.detect_pokemeow_reply")
 # 🗂 Track scheduled "command ready" tasks to avoid duplicates
@@ -46,12 +46,19 @@ async def detect_pokemeow_reply(message: discord.Message):
         debug_log(f"Extracted username: {username}")
         guild = message.guild
 
-        # Match member case-insensitive
-        member = discord.utils.find(
-            lambda m: m.name.lower() == username.lower()
-            or m.display_name.lower() == username.lower(),
-            guild.members,
-        )
+        # Check timer_users cache first
+        if username in timer_users:
+            member = guild.get_member(timer_users[username])
+        else:
+            # Case-insensitive match on name OR display_name
+            member = discord.utils.find(
+                lambda m: m.name.lower() == username.lower()
+                or m.display_name.lower() == username.lower(),
+                guild.members,
+            )
+            if member:
+                timer_users[username] = member.id  # cache for next time
+
         if not member:
             debug_log(f"No guild member found matching username: {username}")
             return
