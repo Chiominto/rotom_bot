@@ -139,7 +139,8 @@ def should_parse(embed_title: Optional[str]) -> bool:
 def clean_username(username: str) -> str:
     # Strip formatting markers, then unescape markdown escapes (e.g. \_ -> _).
     cleaned = re.sub(r"^\*+|\*+$", "", username).strip()
-    cleaned = re.sub(r"\\([_*~`|>])", r"\1", cleaned)
+    cleaned = re.sub(r"^<a?:[^:>]+:\d+>\s*", "", cleaned)
+    cleaned = re.sub(r"\\([._*~`|>])", r"\1", cleaned)
     return cleaned
 
 
@@ -281,7 +282,8 @@ async def split_known_and_unknown_members(
     unknown: List[Tuple[str, int, int]] = []
 
     # Step 1: Grab all user_ids registered in cache
-    from utils.cache.celestial_members_cache import fetch_all_user_ids_from_cache
+    from utils.cache.celestial_members_cache import \
+        fetch_all_user_ids_from_cache
 
     user_ids = fetch_all_user_ids_from_cache()
 
@@ -300,9 +302,8 @@ async def split_known_and_unknown_members(
             known.append((match, username, catches, fishes))
         else:
             # try to match the pokemeow name from cache
-            from utils.cache.celestial_members_cache import (
-                fetch_user_id_by_user_name_or_pokemeow_name_cache,
-            )
+            from utils.cache.celestial_members_cache import \
+                fetch_user_id_by_user_name_or_pokemeow_name_cache
 
             user_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(username)
             if user_id:
