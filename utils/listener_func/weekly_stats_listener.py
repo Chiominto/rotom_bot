@@ -2,27 +2,19 @@ import re
 
 import discord
 
-from constants.celestial_constants import (
-    CELESTIAL_TEXT_CHANNELS,
-    DEFAULT_EMBED_COLOR,
-    MONTHLY_REQUIREMENT,
-    WEEKLY_REQUIREMENT,
-)
-from utils.cache.cache_list import (
-    celestial_members_cache,
-    processed_weekly_stats_messages,
-    weekly_goal_cache,
-)
+from constants.celestial_constants import (CELESTIAL_TEXT_CHANNELS,
+                                           DEFAULT_EMBED_COLOR,
+                                           MONTHLY_REQUIREMENT,
+                                           WEEKLY_REQUIREMENT)
+from utils.cache.cache_list import (celestial_members_cache,
+                                    processed_weekly_stats_messages,
+                                    weekly_goal_cache)
 from utils.db.monthly_goal_tracker import upsert_monthly_goal
 from utils.db.weekly_goal_tracker import upsert_weekly_goal
-from utils.functions.get_pokemeow_reply import (
-    get_message_interaction_member,
-    get_pokemeow_reply,
-)
-from utils.functions.stats_parsers import (
-    parse_clan_stats_message,
-    split_known_and_unknown_members,
-)
+from utils.functions.get_pokemeow_reply import (get_message_interaction_member,
+                                                get_pokemeow_reply)
+from utils.functions.stats_parsers import (parse_clan_stats_message,
+                                           split_known_and_unknown_members)
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
@@ -86,7 +78,8 @@ async def weekly_stats_listener(
     debug_log(f"Queued message/page key as processed: {key}")
 
     # Check if command user is in monthly and weekly goal caches
-    from utils.cache.cache_list import celestial_members_cache, monthly_goal_cache
+    from utils.cache.cache_list import (celestial_members_cache,
+                                        monthly_goal_cache)
 
     clan_member_info = celestial_members_cache.get(command_user_id)
     personal_channel_id = (
@@ -125,10 +118,11 @@ async def weekly_stats_listener(
         )
 
     top_line_catches = 0
-    # Get top line catches
+    # PokéMeow has used both "with 1,234 catches" and "for Catches — 1234".
     user_top_line_match = re.search(
-        r"You're Rank \d+ in your clan's weekly stats — with ([\d,]+) catches!",
+        r"You're Rank \d+ in your clan's weekly stats(?:\s+for\s+Catches)?\s*[—-]\s*(?:with\s+)?([\d,]+)(?:\s+catches)?[!.]?",
         embed_description,
+        re.IGNORECASE,
     )
     top_line_catches = 0
     if user_top_line_match:
@@ -168,9 +162,8 @@ async def weekly_stats_listener(
         return
 
     # Resolve member IDs from parsed stats names
-    from utils.cache.celestial_members_cache import (
-        fetch_user_id_by_user_name_or_pokemeow_name_cache,
-    )
+    from utils.cache.celestial_members_cache import \
+        fetch_user_id_by_user_name_or_pokemeow_name_cache
 
     upserts_count = 0
     goal_checks_count = 0

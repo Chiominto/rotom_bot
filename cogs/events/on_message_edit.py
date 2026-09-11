@@ -6,6 +6,7 @@ from utils.listener_func.berry_listener import berry_listener
 from utils.listener_func.berry_pouch_listener import handle_berry_pouch_message
 from utils.listener_func.explore_caught_listener import explore_caught_listener
 from utils.listener_func.faction_ball_alert import faction_ball_alert
+from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.monthly_stats_listener import monthly_stats_listener
 from utils.listener_func.pokemon_caught_listener import pokemon_caught_listener
 from utils.listener_func.wb_reg_listener import handle_wb_register_command
@@ -72,6 +73,21 @@ class OnMessageEditCog(commands.Cog):
             and not after.webhook_id
         ):
             return
+
+        # ————————————————————————————————
+        # ⚡ Fish Timer
+        # ————————————————————————————————
+        if (
+            first_embed_description
+            and "cast a" in first_embed_description
+            and "into the water" in first_embed_description
+        ):
+            pretty_log(
+                "info",
+                f"Detected edited fishing result | Message ID: {after.id} | Channel: {after.channel.name}",
+            )
+            await fish_timer_handler(after)
+
         # ————————————————————————————————
         # ⚡ Pokemon Caught Listener
         # ————————————————————————————————

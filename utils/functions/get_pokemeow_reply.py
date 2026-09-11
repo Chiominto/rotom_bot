@@ -68,28 +68,24 @@ async def get_pokemeow_reply(message: discord.Message) -> discord.Member | None:
     return member
 
 
-def get_message_interaction_member(message: discord.Message) -> discord.Member | None:
+def get_message_interaction_member(
+    message: discord.Message,
+) -> discord.Member | discord.User | None:
     """
     Returns the member who triggered the interaction that created this message, if available.
     Returns None if not an interaction-created message or not a guild interaction.
     """
     interaction_metadata = getattr(message, "interaction_metadata", None)
-    if not interaction_metadata:
+    interaction = interaction_metadata or getattr(message, "interaction", None)
+    if not interaction:
         return None
 
-    # Try member first
-    member = getattr(interaction_metadata, "member", None)
+    member = getattr(interaction, "member", None)
     if isinstance(member, discord.Member):
         return member
 
-    # Try user (may be discord.User, not Member)
-    user = getattr(interaction_metadata, "user", None)
-    if isinstance(user, discord.Member):
+    user = getattr(interaction, "user", None)
+    if isinstance(user, (discord.Member, discord.User)):
         return user
-    elif isinstance(user, discord.User) and message.guild:
-        # Try to fetch member from guild
-        fetched_member = message.guild.get_member(user.id)
-        if fetched_member:
-            return fetched_member
 
     return None

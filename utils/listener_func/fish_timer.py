@@ -7,8 +7,10 @@ from discord.ext import commands
 
 from constants.aesthetics import *
 from constants.celestial_constants import POKEMEOW_APPLICATION_ID
-from utils.cache.cache_list import timer_cache, timer_users  # 💜 import your cache
-from utils.functions.get_pokemeow_reply import get_pokemeow_reply
+from utils.cache.cache_list import timer_cache  # 💜 import your cache
+from utils.cache.cache_list import timer_users
+from utils.functions.get_pokemeow_reply import (get_message_interaction_member,
+                                                get_pokemeow_reply)
 from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
@@ -22,13 +24,19 @@ fish_ready_tasks = {}
 
 def extract_fishing_trainer_name(description: str) -> str | None:
     """
-    Extracts the trainer name (e.g. 'khy.09') from a PokéMeow fishing embed description.
-    Example: '<:irida:...> **khy.09** cast a ...'
+    Extract a trainer name from a PokéMeow fishing embed description.
     """
-    match = re.search(r"\*\*(.+?)\*\* cast a", description)
+    command_prefix, separator, _ = description.partition(" cast a")
+    if not separator:
+        return None
+
+    match = re.search(r"\*\*(.+?)\*\*\s*$", command_prefix)
     if match:
         return match.group(1).strip()
-    return None
+
+    # Slash-command results may omit the bold markdown around the username.
+    prefix_parts = command_prefix.split()
+    return prefix_parts[-1].strip("*") if prefix_parts else None
 
 
 # 💜────────────────────────────────────────────
@@ -44,24 +52,39 @@ async def fish_timer_handler(message: discord.Message):
       - on w/o pings → send message w/o mention
     """
     try:
-        debug_log(f"Received message from author ID: {message.author.id}")
-        if message.author.id != POKEMEOW_APPLICATION_ID:
-            # debug_log("Message is not from PokeMeow bot, ignoring.")
+        source_ids = {
+            message.author.id,
+            getattr(message, "application_id", None),
+            message.webhook_id,
+        }
+        if POKEMEOW_APPLICATION_ID not in source_ids:
             return
 
         if not message.embeds:
-            # debug_log("Message has no embeds, ignoring.")
             return
 
         embed = message.embeds[0]
         embed_description = embed.description or ""
         guild = message.guild
-        # debug_log(f"Embed description (first 100 chars): {embed_description[:100]}")
+        pretty_log(
+            tag="info",
+            message=(
+                f"Matched Fish Timer | Message ID: {message.id} | "
+                f"Channel: {message.channel}"
+            ),
+        )
 
         member = await get_pokemeow_reply(message)
         if not member:
+            member = get_message_interaction_member(message)
+            if member:
+                debug_log(
+                    f"Matched slash-command interaction member: {member} (ID: {member.id})"
+                )
+
+        if not member:
             debug_log(
-                "get_pokemeow_reply returned None, falling back to username extraction."
+                "No reply or interaction member found, falling back to username extraction."
             )
             # Fall back to username extraction if needed
             user_name = extract_fishing_trainer_name(embed_description)
@@ -162,6 +185,10 @@ async def fish_timer_handler(message: discord.Message):
 
         debug_log(f"Creating notify_ready task for member {member.id}")
         fish_ready_tasks[member.id] = asyncio.create_task(notify_ready())
+        pretty_log(
+            tag="schedule",
+            message=f"Scheduled fish timer for {member} (ID: {member.id})",
+        )
 
     except Exception as e:
         debug_log(f"Exception in fish_timer_handler: {e}", highlight=True)

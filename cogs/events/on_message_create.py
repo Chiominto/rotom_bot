@@ -1,38 +1,29 @@
 import discord
 from discord.ext import commands
 
-from constants.celestial_constants import (
-    CC_SERVER_ID,
-    CELESTIAL_TEXT_CHANNELS,
-    POKEMEOW_APPLICATION_ID,
-)
+from constants.celestial_constants import (CC_SERVER_ID,
+                                           CELESTIAL_TEXT_CHANNELS,
+                                           POKEMEOW_APPLICATION_ID)
 from utils.listener_func.battle_timer import detect_pokemeow_battle
 from utils.listener_func.battle_weakness import weakness_chart
 from utils.listener_func.berry_listener import berry_listener
 from utils.listener_func.berry_water_listener import (
-    handle_berry_water_message,
-    handle_mulch_message,
-)
+    handle_berry_water_message, handle_mulch_message)
 from utils.listener_func.bud_ev_listener import handle_pokemeow_embed_sync
 from utils.listener_func.egg_alert_listener import (
-    egg_hatched_listener,
-    egg_ready_to_hatch_listener,
-)
-from utils.listener_func.ev_tracker_listener import handle_pokemeow_battle_message
+    egg_hatched_listener, egg_ready_to_hatch_listener)
+from utils.listener_func.ev_tracker_listener import \
+    handle_pokemeow_battle_message
 from utils.listener_func.faction_ball_alert import faction_ball_alert
 from utils.listener_func.faction_ball_listener import (
-    extract_faction_ball_from_daily,
-    extract_faction_ball_from_fa,
-)
+    extract_faction_ball_from_daily, extract_faction_ball_from_fa)
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.held_item_ping import held_item_ping_handler
 from utils.listener_func.market_view_listener import market_view_listener
 from utils.listener_func.monthly_stats_listener import monthly_stats_listener
 from utils.listener_func.pokemon_timer import detect_pokemeow_reply
 from utils.listener_func.special_battle_npc_listener import (
-    special_battle_npc_listener,
-    special_battle_npc_timer_listener,
-)
+    special_battle_npc_listener, special_battle_npc_timer_listener)
 from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.logs.pretty_log import pretty_log
@@ -99,6 +90,21 @@ class MessageCreateListener(commands.Cog):
             and not message.webhook_id
         ):
             return
+
+        """if message.channel.id == 1220786982070784112:
+            pretty_log(
+                "debug",
+                (
+                    f"Channel message | id={message.id} | author={message.author} "
+                    f"({message.author.id}) | content={content!r} | "
+                    f"embeds={len(message.embeds)} | webhook_id={message.webhook_id} | "
+                    f"application_id={getattr(message, 'application_id', None)} | "
+                    f"interaction_metadata={getattr(message, 'interaction_metadata', None)} | "
+                    f"first_embed_description={first_embed_description!r}"
+                ),
+                label="Channel Message Debug",
+            )"""
+
         # ————————————————————————————————
         # ⚡ Pokemon Timer
         # ————————————————————————————————
@@ -119,6 +125,10 @@ class MessageCreateListener(commands.Cog):
                 and "cast a" in embed_description
                 and "into the water" in embed_description
             ):
+                pretty_log(
+                    "info",
+                    f"Detected fishing result | Message ID: {message.id} | Channel: {message.channel.name}",
+                )
                 await fish_timer_handler(message)
 
         # ————————————————————————————————
