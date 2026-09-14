@@ -24,6 +24,7 @@ from utils.listener_func.monthly_stats_listener import monthly_stats_listener
 from utils.listener_func.pokemon_timer import detect_pokemeow_reply
 from utils.listener_func.special_battle_npc_listener import (
     special_battle_npc_listener, special_battle_npc_timer_listener)
+from utils.listener_func.username_change import handle_username_change
 from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.logs.pretty_log import pretty_log
@@ -304,7 +305,7 @@ class MessageCreateListener(commands.Cog):
         # ————————————————————————————————
         if message.embeds and message.embeds[0]:
             if (
-                ":crossed_swords" in first_embed_title
+                "⚔️" in first_embed_title
                 and "sent out" in first_embed_description
             ):
                 try:
@@ -378,6 +379,25 @@ class MessageCreateListener(commands.Cog):
             )
             await special_battle_npc_timer_listener(bot=self.bot, message=message)
 
+        # ————————————————————————————————
+        # 🩵 Username Change Handler
+        # ————————————————————————————————
+        if (
+            content
+            and message.author.id == POKEMEOW_APPLICATION_ID
+            and "You spent <:PokeCoin:666879070650236928> **100,000** "
+            "to change your username to" in content
+        ):
+            updated = await handle_username_change(bot=self.bot, message=message)
+            pretty_log(
+                "info" if updated else "warning",
+                (
+                    f"Updated username for message ID {message.id}"
+                    if updated
+                    else f"No database update occurred for username change message ID {message.id}"
+                ),
+                label="Username Change Handler",
+            )
 
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function

@@ -37,6 +37,24 @@ def upsert_faction_cache(user_id: int, user_name: str, faction: str):
         label="🛡️  Faction CACHE",
     )
 
+
+def upsert_new_name_cache(user_id: int, new_user_name: str):
+    """Update a user's name in the cache."""
+    if user_id in faction_cache:
+        faction_cache[user_id]["user_name"] = new_user_name
+        pretty_log(
+            "info",
+            f"Updated username for user_id {user_id} to {new_user_name} in cache",
+            label="🛡️  Faction CACHE",
+        )
+    else:
+        pretty_log(
+            "info",
+            f"Attempted to update username for non-existent user_id {user_id} in cache.",
+            label="🛡️  Faction CACHE",
+        )
+
+
 def get_user_faction(user_id: int) -> str | None:
     """Get a user's faction from cache."""
     user_data = faction_cache.get(user_id)

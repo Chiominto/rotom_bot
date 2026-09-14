@@ -1,5 +1,7 @@
-from utils.logs.pretty_log import pretty_log
 import discord
+
+from utils.logs.pretty_log import pretty_log
+
 # SQL SCRIPT
 """CREATE TABLE factions (
     user_id BIGINT PRIMARY KEY,
@@ -83,3 +85,47 @@ async def remove_faction(bot:discord.Client, user_id: int):
             f"Failed to remove faction for user_id {user_id}: {e}",
             bot=bot,
         )
+
+async def upsert_new_name(bot:discord.Client, user_id: int, new_user_name: str):
+    try:
+        async with bot.pg_pool.acquire() as conn:
+            updated_user = await conn.fetchrow(
+                """
+                UPDATE factions
+                SET user_name = $2
+                WHERE user_id = $1
+                RETURNING user_id
+                """,
+                user_id,
+                new_user_name,
+            )
+
+        if updated_user is None:
+            pretty_log(
+                "warning",
+                f"No faction row found for user_id {user_id}; username was not updated",
+                bot=bot,
+            )
+            return False
+
+        pretty_log(
+            "db",
+            f"Updated username for user_id {user_id} to {new_user_name}",
+            bot=bot,
+        )
+        # Update cache as well
+        from utils.cache.faction_cache import upsert_new_name_cache
+        upsert_new_name_cache(user_id, new_user_name)
+        pretty_log(
+            "info",
+            f"Updated username for user_id {user_id} to {new_user_name} in cache",
+            bot=bot,
+        )
+        return True
+    except Exception as e:
+        pretty_log(
+            "error",
+            f"Failed to update username for user_id {user_id}: {e}",
+            bot=bot,
+        )
+        return False
