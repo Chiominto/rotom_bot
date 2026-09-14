@@ -5,10 +5,8 @@ from discord.ext import commands
 from constants.aesthetics import Emojis
 from constants.celestial_constants import CELESTIAL_EMOJIS
 from utils.cache.cache_list import not_weakness_chart_user_names
-from utils.db.utilities_db import (
-    fetch_user_utility_type_setting,
-    upsert_utility_setting,
-)
+from utils.db.utilities_db import (fetch_user_utility_type_setting,
+                                   upsert_utility_setting)
 from utils.functions.safe_response import safe_respond
 from utils.logs.pretty_log import pretty_log
 
@@ -162,7 +160,7 @@ class UtilitySettingsView(discord.ui.View):
             # 🔹 3-State Cycle: off -> full -> truncated -> off
             if current_state == "off":
                 new_state = "full"
-            elif current_state == "on":
+            elif current_state == "full":
                 new_state = "truncated"
             else:  # react or any other state
                 new_state = "off"
