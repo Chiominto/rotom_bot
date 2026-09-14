@@ -305,7 +305,11 @@ class MessageCreateListener(commands.Cog):
         # ————————————————————————————————
         if message.embeds and message.embeds[0]:
             if (
-                "⚔️" in first_embed_title
+                (
+                    ":crossed_swords:" in first_embed_title
+                    or "<:crossed_swords:" in first_embed_title
+                    or "⚔️" in first_embed_title
+                )
                 and "sent out" in first_embed_description
             ):
                 try:
