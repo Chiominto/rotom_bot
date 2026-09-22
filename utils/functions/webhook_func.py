@@ -7,6 +7,10 @@ from utils.db.webhook_db_url import upsert_webhook_url
 from utils.logs.pretty_log import pretty_log
 
 
+class WebhookSendError(Exception):
+    """Safe-to-log webhook failure without Discord's HTML response body."""
+
+
 async def create_webhook_func(
     bot, channel: discord.TextChannel, name: str
 ) -> str | None:
@@ -72,4 +76,10 @@ async def send_webhook(
     webhook_url = webhook_url_row["url"]
     if webhook_url:
         webhook = discord.Webhook.from_url(webhook_url, client=bot)
-        await webhook.send(content=content, embed=embed, wait=True)
+        try:
+            await webhook.send(content=content, embed=embed, wait=True)
+        except discord.HTTPException as error:
+            raise WebhookSendError(
+                f"Discord webhook request failed with HTTP {error.status} "
+                f"for channel '{channel.name}' (ID: {channel.id})."
+            ) from None

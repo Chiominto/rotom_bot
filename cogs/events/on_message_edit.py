@@ -82,10 +82,6 @@ class OnMessageEditCog(commands.Cog):
             and "cast a" in first_embed_description
             and "into the water" in first_embed_description
         ):
-            pretty_log(
-                "info",
-                f"Detected edited fishing result | Message ID: {after.id} | Channel: {after.channel.name}",
-            )
             await fish_timer_handler(after)
 
         # ————————————————————————————————
@@ -126,21 +122,12 @@ class OnMessageEditCog(commands.Cog):
         # ————————————————————————————————
         if first_embed:
             if triggers["weekly_stats_command"] in first_embed_title:
-                pretty_log(
-                    "info",
-                    f"Detected edit triggering Weekly Stats Listener in {after.channel.name}",
-                )
                 await weekly_stats_listener(self.bot, before, after)
         # ————————————————————————————————
         # 🩵 Monthly Stats Listener
         # ————————————————————————————————
         if first_embed:
             if triggers["monthly_stats_command"] in first_embed_title:
-
-                pretty_log(
-                    "info",
-                    f"Detected edit triggering Monthly Stats Listener in {after.channel.name}",
-                )
                 await monthly_stats_listener(self.bot, before, after)
 
         # ————————————————————————————————
@@ -148,10 +135,6 @@ class OnMessageEditCog(commands.Cog):
         # ————————————————————————————————
         if content:
             if triggers["explore_listener"] in content:
-                pretty_log(
-                    "info",
-                    f"Detected edit triggering Explore Caught Listener in {after.channel.name}",
-                )
                 await explore_caught_listener(self.bot, before, after)
 
         # ————————————————————————————————
@@ -162,10 +145,6 @@ class OnMessageEditCog(commands.Cog):
                 first_embed_description
                 and "garden overview" in first_embed_description.lower()
             ):
-                pretty_log(
-                    "info",
-                    "Detected Garden Overview embed, processing berry reminders...",
-                )
                 await berry_listener(
                     bot=self.bot,
                     before_message=before,
@@ -179,10 +158,6 @@ class OnMessageEditCog(commands.Cog):
                 first_embed_footer_text
                 and "berry pouch" in first_embed_footer_text.lower()
             ):
-                pretty_log(
-                    "info",
-                    "Detected Berry Pouch embed, processing berry pouch listener...",
-                )
                 await handle_berry_pouch_message(
                     bot=self.bot,
                     before=before,
@@ -199,10 +174,6 @@ class OnMessageEditCog(commands.Cog):
                 and first_embed.title
                 and "**A World Boss has spawned! Register now!**" in first_embed.title
             ):
-                pretty_log(
-                    "info",
-                    f"Matched World Boss Battle Reminder Registration Confirmation | Message ID: {after.id} | Channel: {after.channel.name}",
-                )
                 await handle_wb_register_command(
                     bot=self.bot, before_message=before, message=after
                 )

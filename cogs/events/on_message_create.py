@@ -126,10 +126,7 @@ class MessageCreateListener(commands.Cog):
                 and "cast a" in embed_description
                 and "into the water" in embed_description
             ):
-                pretty_log(
-                    "info",
-                    f"Detected fishing result | Message ID: {message.id} | Channel: {message.channel.name}",
-                )
+
                 await fish_timer_handler(message)
 
         # ————————————————————————————————
@@ -153,10 +150,6 @@ class MessageCreateListener(commands.Cog):
         # ————————————————————————————————
         if first_embed:
             if first_embed.title and "daily streak" in first_embed.title.lower():
-                pretty_log(
-                    "info",
-                    f"Matched Daily Faction Ball Listener | Message ID: {message.id} | Channel: {message.channel.name}",
-                )
                 await extract_faction_ball_from_daily(bot=self.bot, message=message)
         # ————————————————————————————————
         # ⚡ Faction Command Faction Ball Extraction
@@ -170,10 +163,7 @@ class MessageCreateListener(commands.Cog):
         # ⚡ EV Training Listener
         # ————————————————————————————————
         if content and triggers["ev_training"] in content:
-            pretty_log(
-                "info",
-                f"Matched EV Training Listener | Message ID: {message.id} | Channel: {message.channel.name}",
-            )
+
             try:
                 await handle_pokemeow_battle_message(bot=self.bot, message=message)
             except Exception as e:
@@ -189,10 +179,10 @@ class MessageCreateListener(commands.Cog):
             first_embed_description
             and triggers["bud_info_trigger"] in first_embed_description
         ):
-            pretty_log(
+            """pretty_log(
                 "info",
                 f"Matched EV Tracker Bud Info Listener | Message ID: {message.id} | Channel: {message.channel.name}",
-            )
+            )"""
             try:
                 await handle_pokemeow_embed_sync(bot=self.bot, message=message)
             except Exception as e:
@@ -210,10 +200,6 @@ class MessageCreateListener(commands.Cog):
             and not "Recent" in first_embed_author
             and not "Rarity" in first_embed_author
         ):
-            pretty_log(
-                tag="info",
-                message=f"Processing market view message with embed author: {first_embed_author}",
-            )
             await market_view_listener(self.bot, message)
 
         # ————————————————————————————————
@@ -244,10 +230,6 @@ class MessageCreateListener(commands.Cog):
                 first_embed_description
                 and "garden overview" in first_embed_description.lower()
             ):
-                pretty_log(
-                    "info",
-                    "Detected Garden Overview embed, processing berry reminders...",
-                )
                 await berry_listener(
                     bot=self.bot,
                     before_message=message,
