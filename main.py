@@ -78,13 +78,26 @@ async def on_ready():
     else:
         pretty_log("info", f"Bot online as {user} (ID: {user.id})")
 
-    # Sync commands
-    try:
-        await bot.tree.sync()
-        slash_count = len(bot.tree.get_commands())
-        pretty_log("info", f"{slash_count} slash commands synced globally.")
-    except Exception as e:
-        pretty_log("error", f"Slash sync commands failed: {e}")
+    # Sync commands once, only if not already synced this session
+    if not hasattr(bot, "_commands_synced"):
+        try:
+            await bot.tree.sync()
+            slash_count = len(bot.tree.get_commands())
+            pretty_log("info", f"{slash_count} slash commands synced globally.")
+            bot._commands_synced = True
+        except discord.errors.RateLimited as rate_limit_error:
+            pretty_log(
+                "warn",
+                f"Rate limited during command sync: {rate_limit_error}. Retrying in 60 seconds.",
+            )
+            await asyncio.sleep(60)
+            try:
+                await bot.tree.sync()
+                bot._commands_synced = True
+            except Exception as e:
+                pretty_log("error", f"Failed to sync commands after retry: {e}")
+        except Exception as e:
+            pretty_log("error", f"Slash sync commands failed: {e}")
 
     # Start the hourly cache refresh task
     if not refresh_all_caches.is_running():
@@ -124,19 +137,36 @@ async def main():
     pretty_log("ready", "Rotom Bot is starting...")
 
     retry_delay = 5
+    max_retry_delay = 300  # Cap at 5 minutes
+    connection_attempts = 0
+    
     while True:
         try:
+            connection_attempts += 1
+            pretty_log("info", f"Connection attempt #{connection_attempts}")
             await bot.start(os.getenv("DISCORD_TOKEN"))
         except KeyboardInterrupt:
             pretty_log("ready", "Shutting down Rotom Bot...")
             break
+        except discord.errors.RateLimited as rate_limit_error:
+            # Handle Discord rate limiting specifically
+            pretty_log(
+                "error",
+                f"Discord rate limited: {rate_limit_error}. Backing off.",
+            )
+            retry_delay = min(retry_delay * 2, max_retry_delay)
+            pretty_log(
+                "ready",
+                f"Restarting Rotom Bot in {retry_delay} seconds (rate limited)...",
+            )
+            await asyncio.sleep(retry_delay)
         except Exception as e:
             pretty_log("error", f"Bot crashed: {e}", include_trace=True)
+            retry_delay = min(retry_delay * 2, max_retry_delay)
             pretty_log(
                 "ready", f"Restarting Rotom Bot in {retry_delay} seconds..."
             )
             await asyncio.sleep(retry_delay)
-            retry_delay = min(retry_delay * 2, 60)
 
 
 # ❀───────────────────────────────❀
@@ -144,3 +174,4 @@ async def main():
 # ❀───────────────────────────────❀
 if __name__ == "__main__":
     asyncio.run(main())
+
