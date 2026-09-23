@@ -23,6 +23,28 @@ from utils.logs.pretty_log import pretty_log
 def get_number_after_exclamation(text):
     match = re.search(r'!\s*(\d+)', text)
     return match.group(1) if match else None
+
+
+def debug_message_edit(before: discord.Message, after: discord.Message):
+    """Dump raw content/embeds of both message versions for debugging edits."""
+    def dump(label, message):
+        pretty_log(
+            "debug",
+            f"[{label}] content={message.content!r}",
+            label="🐛 MESSAGE EDIT DEBUG",
+        )
+        for i, embed in enumerate(message.embeds):
+            pretty_log(
+                "debug",
+                f"[{label}] embed[{i}] title={embed.title!r} "
+                f"author={getattr(embed.author, 'name', None)!r} "
+                f"description={embed.description!r} "
+                f"footer={getattr(embed.footer, 'text', None)!r}",
+                label="🐛 MESSAGE EDIT DEBUG",
+            )
+
+    dump("BEFORE", before)
+    dump("AFTER", after)
 FISHING_COLOR = 0x87CEFA
 # ️────────────────────────────────────────────
 #        ⚔️ Message Triggers
@@ -85,6 +107,12 @@ class OnMessageEditCog(commands.Cog):
             return
 
         # ————————————————————————————————
+        # ⚡ Message Edit Checker (debug)
+        # ————————————————————————————————
+        """if after.channel.id == 1528225942604878125:
+            debug_message_edit(before, after)"""
+
+        # ————————————————————————————————
         # ⚡ Fish Timer
         # ————————————————————————————————
         if (
@@ -118,6 +146,7 @@ class OnMessageEditCog(commands.Cog):
                        pin_number=pin_number,
                        source="fish",
                    )
+
         # ————————————————————————————————
         # ⚡ Faction Ball Alert
         # ————————————————————————————————
