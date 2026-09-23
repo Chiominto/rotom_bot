@@ -11,6 +11,7 @@ from utils.background_task.central_loop_task.berry_water_checker import (
 from utils.cache.weekly_goal_tracker_cache import flush_weekly_goal_cache
 from utils.cache.monthly_goal_tracker_cache import flush_monthly_goal_cache
 from utils.background_task.central_loop_task.special_battle_timer_checker import special_battle_timer_checker
+from utils.background_task.central_loop_task.pokemeow_timers_checker import pokemeow_timer_checker
 # 🍰──────────────────────────────
 #   🎀 Cog: CentralLoop
 #   Handles background tasks every 60 seconds
@@ -64,6 +65,9 @@ class CentralLoop(commands.Cog):
                 # ⚔️ Check special battle timers
                 await special_battle_timer_checker(bot=self.bot)
 
+                # 🐱 Check pokemeow timers
+                await pokemeow_timer_checker(bot=self.bot)
+
             except Exception as e:
                 pretty_log(
                     "error",
@@ -94,5 +98,6 @@ async def setup(bot: commands.Bot):
     print("  ✅ ⏰  flush_weekly_goal_cache")
     print("  ✅ ⏰  flush_monthly_goal_cache")
     print("  ✅ ⏰  special_battle_timer_checker")
+    print("  ✅ ⏰  pokemeow_timer_checker")
     print("  🧭 CentralLoop ticking every 60 seconds!")
     print("  ─────────────────────────────────────────────\n")
