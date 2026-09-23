@@ -16,6 +16,8 @@ from utils.listener_func.wb_reg_listener import handle_wb_register_command
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.logs.pretty_log import pretty_log
 from utils.listener_func.pokemon_pin_numbers_listener import pokemon_pin_numbers_listener
+from utils.listener_func.pin_timer_listener import pin_timer_listener
+
 def get_number_after_exclamation(text):
     match = re.search(r'!\s*(\d+)', text)
     return match.group(1) if match else None
@@ -211,6 +213,16 @@ class OnMessageEditCog(commands.Cog):
                             pin_number=pin_number,
                             source="safari",
                         )
+        # ————————————————————————————————
+        # ⚡ Missing Number Quest Timer
+        # ————————————————————————————————
+        if first_embed:
+            if first_embed_title and "the missing numbers" in first_embed_title.lower():
+                if first_embed_description and "you can submit another PIN" in first_embed_description.lower():
+                    await pin_timer_listener(
+                        bot=self.bot,
+                        message=after,
+                    )
 
 # 🟣────────────────────────────────────────────
 #         💤 Setup Function
