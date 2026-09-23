@@ -1,8 +1,8 @@
 import re
+from email.mime import message
 
 import discord
 from discord.ext import commands
-
 
 from constants.celestial_constants import CC_SERVER_ID, POKEMEOW_APPLICATION_ID
 from utils.listener_func.berry_listener import berry_listener
@@ -11,12 +11,14 @@ from utils.listener_func.explore_caught_listener import explore_caught_listener
 from utils.listener_func.faction_ball_alert import faction_ball_alert
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.monthly_stats_listener import monthly_stats_listener
+from utils.listener_func.pin_timer_listener import pin_timer_listener
 from utils.listener_func.pokemon_caught_listener import pokemon_caught_listener
+from utils.listener_func.pokemon_pin_numbers_listener import \
+    pokemon_pin_numbers_listener
 from utils.listener_func.wb_reg_listener import handle_wb_register_command
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.logs.pretty_log import pretty_log
-from utils.listener_func.pokemon_pin_numbers_listener import pokemon_pin_numbers_listener
-from utils.listener_func.pin_timer_listener import pin_timer_listener
+
 
 def get_number_after_exclamation(text):
     match = re.search(r'!\s*(\d+)', text)
@@ -218,7 +220,8 @@ class OnMessageEditCog(commands.Cog):
         # ————————————————————————————————
         if first_embed:
             if first_embed_title and "the missing numbers" in first_embed_title.lower():
-                if first_embed_description and "you can submit another PIN" in first_embed_description.lower():
+                if first_embed_description and "you can submit another pin" in first_embed_description.lower():
+                    pretty_log(tag="info", message=f"Missing Number Quest Timer triggered in {after.channel.name}")
                     await pin_timer_listener(
                         bot=self.bot,
                         message=after,

@@ -66,13 +66,13 @@ async def fish_timer_handler(message: discord.Message):
         embed = message.embeds[0]
         embed_description = embed.description or ""
         guild = message.guild
-        pretty_log(
+        """pretty_log(
             tag="info",
             message=(
                 f"Matched Fish Timer | Message ID: {message.id} | "
                 f"Channel: {message.channel}"
             ),
-        )
+        )"""
 
         member = await get_pokemeow_reply(message)
         if not member:

@@ -16,7 +16,7 @@ from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
-enable_debug(f"{__name__}.pokemon_pin_numbers_listener")
+#enable_debug(f"{__name__}.pokemon_pin_numbers_listener")
 
 
 async def pokemon_pin_numbers_listener(bot:discord.Client, message:discord.Message, pin_number: str, source:str):

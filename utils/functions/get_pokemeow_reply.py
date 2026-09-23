@@ -76,15 +76,14 @@ def get_message_interaction_member(
     Returns None if not an interaction-created message or not a guild interaction.
     """
     interaction_metadata = getattr(message, "interaction_metadata", None)
-    interaction = interaction_metadata or getattr(message, "interaction", None)
-    if not interaction:
+    if not interaction_metadata:
         return None
 
-    member = getattr(interaction, "member", None)
+    member = getattr(interaction_metadata, "member", None)
     if isinstance(member, discord.Member):
         return member
 
-    user = getattr(interaction, "user", None)
+    user = getattr(interaction_metadata, "user", None)
     if isinstance(user, (discord.Member, discord.User)):
         return user
 
