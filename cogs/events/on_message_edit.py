@@ -1,5 +1,8 @@
+import re
+
 import discord
 from discord.ext import commands
+
 
 from constants.celestial_constants import CC_SERVER_ID, POKEMEOW_APPLICATION_ID
 from utils.listener_func.berry_listener import berry_listener
@@ -12,7 +15,10 @@ from utils.listener_func.pokemon_caught_listener import pokemon_caught_listener
 from utils.listener_func.wb_reg_listener import handle_wb_register_command
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.logs.pretty_log import pretty_log
-
+from utils.listener_func.pokemon_pin_numbers_listener import pokemon_pin_numbers_listener
+def get_number_after_exclamation(text):
+    match = re.search(r'!\s*(\d+)', text)
+    return match.group(1) if match else None
 FISHING_COLOR = 0x87CEFA
 # ️────────────────────────────────────────────
 #        ⚔️ Message Triggers
@@ -94,6 +100,20 @@ class OnMessageEditCog(commands.Cog):
                 await pokemon_caught_listener(
                     bot=self.bot, before_message=before, message=after
                 )
+
+        # ————————————————————————————————
+        # ⚡ Fish Pin Alert
+        # ————————————————————————————————
+        if after.embeds:
+           if first_embed_author and "a wild pokemon appeared" in first_embed_author.lower():
+               pin_number = get_number_after_exclamation(first_embed_author)
+               if pin_number:
+                   await pokemon_pin_numbers_listener(
+                       bot=self.bot,
+                       message=after,
+                       pin_number=pin_number,
+                       source="fish",
+                   )
         # ————————————————————————————————
         # ⚡ Faction Ball Alert
         # ————————————————————————————————
@@ -177,7 +197,20 @@ class OnMessageEditCog(commands.Cog):
                 await handle_wb_register_command(
                     bot=self.bot, before_message=before, message=after
                 )
-
+        # ————————————————————————————————
+        # ⚡ Safari Zone Pin Alert Listener
+        # ————————————————————————————————
+        if first_embed:
+            if first_embed_footer_text and "use a safari ball to catch it" in first_embed_footer_text.lower():
+                if first_embed_author:
+                    pin_number = get_number_after_exclamation(first_embed_author)
+                    if pin_number:
+                        await pokemon_pin_numbers_listener(
+                            bot=self.bot,
+                            message=after,
+                            pin_number=pin_number,
+                            source="safari",
+                        )
 
 # 🟣────────────────────────────────────────────
 #         💤 Setup Function

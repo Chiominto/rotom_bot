@@ -89,3 +89,16 @@ def get_message_interaction_member(
         return user
 
     return None
+
+
+async def get_pokemeow_reply_or_interaction_member(
+    message: discord.Message,
+) -> discord.Member | discord.User | None:
+    """
+    Returns the member who was replied to, or the interaction user as a fallback.
+    """
+    member = await get_pokemeow_reply(message)
+    if member:
+        return member
+
+    return get_message_interaction_member(message)

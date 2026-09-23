@@ -4,17 +4,18 @@ from discord.ext import commands
 
 from constants.aesthetics import Emojis
 from constants.celestial_constants import CELESTIAL_EMOJIS
-from utils.db.egg_alert_db_func import fetch_user_egg_alert, upsert_user_egg_alert
+from utils.db.egg_alert_db_func import (fetch_user_egg_alert,
+                                        upsert_user_egg_alert)
 from utils.db.faction_ball_alert_db_func import (
-    fetch_user_faction_ball_alert,
-    upsert_user_faction_ball_alert,
-)
-from utils.db.item_alert_db_func import fetch_user_item_alert, upsert_user_item_alert
+    fetch_user_faction_ball_alert, upsert_user_faction_ball_alert)
+from utils.db.item_alert_db_func import (fetch_user_item_alert,
+                                         upsert_user_item_alert)
+from utils.db.pin_numbers_alert_db_func import (fetch_user_pin_numbers_alert,
+                                                upsert_user_pin_numbers_alert)
 from utils.db.research_fossil_alert_db_func import (
-    fetch_user_research_fossil_alert,
-    upsert_user_research_fossil_alert,
-)
-from utils.db.wb_fight_db import fetch_user_wb_battle_alert, upsert_user_wb_battle_alert
+    fetch_user_research_fossil_alert, upsert_user_research_fossil_alert)
+from utils.db.wb_fight_db import (fetch_user_wb_battle_alert,
+                                  upsert_user_wb_battle_alert)
 from utils.functions.safe_response import safe_respond
 from utils.logs.pretty_log import pretty_log
 
@@ -35,12 +36,14 @@ async def alert_settings_func(bot: commands.Bot, interaction: discord.Interactio
         research_fossil_alert = await fetch_user_research_fossil_alert(
             bot, interaction.user.id
         )
+        pin_numbers_alert = await fetch_user_pin_numbers_alert(bot, interaction.user.id)
 
         faction_ball_alert = faction_ball_alert or {"notify": "off"}
         wb_battle_alert = wb_battle_alert or {"notify": "off"}
         egg_alert = egg_alert or {"notify": "off"}
         item_alert = item_alert or {"notify": "off"}
         research_fossil_alert = research_fossil_alert or {"notify": "off"}
+        pin_numbers_alert = pin_numbers_alert or {"notify": "off"}
 
         view = AlertSettingsView(
             bot,
@@ -50,6 +53,7 @@ async def alert_settings_func(bot: commands.Bot, interaction: discord.Interactio
             egg_alert=egg_alert,
             item_alert=item_alert,
             research_fossil_alert=research_fossil_alert,
+            pin_numbers_alert=pin_numbers_alert,
         )
 
         message = await interaction.followup.send(
@@ -83,6 +87,7 @@ class AlertSettingsView(discord.ui.View):
         egg_alert,
         item_alert,
         research_fossil_alert,
+        pin_numbers_alert,
     ):
         super().__init__(timeout=180)
         self.bot = bot
@@ -92,6 +97,7 @@ class AlertSettingsView(discord.ui.View):
         self.egg_alert = egg_alert
         self.item_alert = item_alert
         self.research_fossil_alert = research_fossil_alert
+        self.pin_numbers_alert = pin_numbers_alert
         self.message = None  # set later
         self.update_button_styles()
 
@@ -430,6 +436,75 @@ class AlertSettingsView(discord.ui.View):
             )
 
     # 💫────────────────────────────────────
+    # [#️⃣ BUTTON] Pin Numbers Alert (3 -State Cycle)
+    # 💫────────────────────────────────────
+    @discord.ui.button(
+        label="Pin Numbers Alert: OFF",
+        style=ButtonStyle.secondary,
+        emoji="#️⃣",
+        row=1,
+    )
+    async def pin_numbers_alert_button(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ):
+        if interaction.user != self.user:
+            await interaction.response.send_message(
+                "You cannot interact with this button.", ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+        try:
+            current_state = (
+                str(self.pin_numbers_alert.get("notify", "off")).lower()
+                if self.pin_numbers_alert
+                else "off"
+            )
+
+            # 🔹 3-State Cycle: off → on → on_no_pings → off
+            if current_state == "off":
+                new_state = "on"
+            elif current_state == "on":
+                new_state = "on_no_pings"
+            else:  # react or any other state
+                new_state = "off"
+
+            await upsert_user_pin_numbers_alert(self.bot, self.user, new_state)
+            self.pin_numbers_alert = {"notify": new_state}
+
+            # 🔹 Refresh buttons
+            self.update_button_styles()
+
+            # 🔹 Display friendly text
+            display_text = {
+                "off": "OFF",
+                "on": "ON",
+                "on_no_pings": "ON (No Pings)",
+            }.get(new_state, "OFF")
+
+            await interaction.edit_original_response(
+                content=f"Modify your Alert Settings:\n#️⃣ Pin Numbers Alert set to **{display_text}**",
+                view=self,
+            )
+
+            pretty_log(
+                tag="ui",
+                message=f"{self.user.display_name} set Pin Numbers Alert to {display_text}",
+                bot=self.bot,
+            )
+
+        except Exception as e:
+            pretty_log(
+                tag="error",
+                message=f"Error toggling Pin Numbers Alert: {e}",
+                bot=self.bot,
+            )
+            await interaction.followup.send(
+                "⚠️ An error occurred while updating Pin Numbers Alert.",
+                ephemeral=True,
+            )
+
+    # 💫────────────────────────────────────
     # [🎨 STYLE UPDATE FUNCTION]
     # 💫────────────────────────────────────
     def update_button_styles(self):
@@ -531,6 +606,25 @@ class AlertSettingsView(discord.ui.View):
         else:
             self.research_fossil_alert_button.style = ButtonStyle.secondary
             self.research_fossil_alert_button.label = "Research Fossil Alert: OFF"
+
+        # #️⃣ Pin Numbers Alert Button (3 states)
+        pin_numbers_alert_state = (
+            str(self.pin_numbers_alert.get("notify", "off")).lower()
+            if self.pin_numbers_alert
+            else "off"
+        )
+        if pin_numbers_alert_state == "off":
+            self.pin_numbers_alert_button.style = ButtonStyle.secondary
+            self.pin_numbers_alert_button.label = "Pin Numbers Alert: OFF"
+        elif pin_numbers_alert_state == "on":
+            self.pin_numbers_alert_button.style = ButtonStyle.success
+            self.pin_numbers_alert_button.label = "Pin Numbers Alert: ON"
+        elif pin_numbers_alert_state == "on_no_pings":
+            self.pin_numbers_alert_button.style = ButtonStyle.primary
+            self.pin_numbers_alert_button.label = "Pin Numbers Alert: ON (No Pings)"
+        else:
+            self.pin_numbers_alert_button.style = ButtonStyle.secondary
+            self.pin_numbers_alert_button.label = "Pin Numbers Alert: OFF"
 
     # 💫────────────────────────────────────
     # [⏰ TIMEOUT HANDLER]

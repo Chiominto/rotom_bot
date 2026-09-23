@@ -22,6 +22,7 @@ from utils.listener_func.held_item_ping import held_item_ping_handler
 from utils.listener_func.market_view_listener import market_view_listener
 from utils.listener_func.monthly_stats_listener import monthly_stats_listener
 from utils.listener_func.pokemon_timer import detect_pokemeow_reply
+from utils.listener_func.pokemon_pin_numbers_listener import pokemon_pin_numbers_listener
 from utils.listener_func.special_battle_npc_listener import (
     special_battle_npc_listener, special_battle_npc_timer_listener)
 from utils.listener_func.username_change import handle_username_change
@@ -38,7 +39,11 @@ triggers = {
     "weekly_stats_command": "**Clan Weekly Stats — Celestial**",
     "monthly_stats_command": "**Clan Monthly Stats — Celestial**",
 }
+import re
 
+def get_number_after_exclamation(text):
+    match = re.search(r'!\s*(\d+)', text)
+    return match.group(1) if match else None
 
 # 🟣────────────────────────────────────────────
 #         💤 Message Create Listener Cog
@@ -114,6 +119,21 @@ class MessageCreateListener(commands.Cog):
             embed_description = embed.description if embed else None
             if embed_description and "found a wild" in embed_description:
                 await detect_pokemeow_reply(message)
+                # ————————————————————————————————
+                # ⚡ Pin Number Alerts
+                # ————————————————————————————————
+                pin_number = get_number_after_exclamation(first_embed_author)
+                if pin_number:
+                    pretty_log(
+                        "info",
+                        f"Detected pin number: {pin_number} for message ID: {message.id}"
+                    )
+                    await pokemon_pin_numbers_listener(
+                        bot=self.bot,
+                        message=message,
+                        pin_number=pin_number,
+                        source="pokemon",
+                    )
 
         # ————————————————————————————————
         # ⚡ Fish Timer
@@ -145,6 +165,8 @@ class MessageCreateListener(commands.Cog):
                 and "found a wild" in first_embed.description
             ):
                 await faction_ball_alert(bot=self.bot, before=message, after=message)
+
+
         # ————————————————————————————————
         # ⚡ Daily Command Faction Ball Extraction
         # ————————————————————————————————

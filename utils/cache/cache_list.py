@@ -10,6 +10,8 @@ processed_weakness_messages: set[int] = set()
 processed_explore_messages = set()
 processed_weekly_stats_messages = set()
 processed_monthly_stats_messages = set()
+processed_pin_numbers_messages = set()
+
 
 LIST_OF_PROCESSED_IDS = [
     processed_faction_ball_alerts,
@@ -18,6 +20,7 @@ LIST_OF_PROCESSED_IDS = [
     processed_explore_messages,
     processed_weekly_stats_messages,
     processed_monthly_stats_messages,
+    processed_pin_numbers_messages,
 ]
 
 
@@ -236,6 +239,15 @@ research_fossil_alert_cache: dict[int, dict] = {}
 #   "notify": str
 # }
 
+# 🔮────────────────────────────────────────────
+#        ⚡ Pin Numbers Alert Cache
+# 👻────────────────────────────────────────────
+pin_numbers_alert_cache: dict[int, dict] = {}
+# Structure:
+# user_id -> {
+#   "user_name": str,
+#   "notify": str
+# }
 # 💫━━━━━━━━━━━━━━━━━━━━━━━━━
 #       🌸 Weakness Data Cache 🌸
 # 💫━━━━━━━━━━━━━━━━━━━━━━━━━

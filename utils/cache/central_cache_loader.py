@@ -18,6 +18,7 @@ from .utilities_cache import load_utility_cache
 from .research_fossil_alert_cache import load_research_fossil_alert_cache
 from .weekly_goal_tracker_cache import load_weekly_goal_cache
 from .monthly_goal_tracker_cache import load_monthly_goal_cache
+from .pin_numbers_alert_cache import load_pin_numbers_alert_cache
 
 async def load_all_cache(bot: discord.Client):
     """
@@ -27,6 +28,7 @@ async def load_all_cache(bot: discord.Client):
 
         # Load Pokémon Cache
         await load_pokemon_cache(bot)
+
 
         # Load Webhook URL Cache
         await load_webhook_url_cache(bot)
@@ -67,6 +69,9 @@ async def load_all_cache(bot: discord.Client):
         # Load Research Fossil Alert Cache
         await load_research_fossil_alert_cache(bot)
 
+        # Load Pin Numbers Alert Cache
+        await load_pin_numbers_alert_cache(bot)
+        
         # Load Utility Cache
         try:
             await load_utility_cache(bot)
