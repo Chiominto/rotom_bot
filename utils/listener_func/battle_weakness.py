@@ -4,17 +4,16 @@ import re
 import discord
 from discord.ext import commands
 
-from utils.cache.cache_list import (
-    not_weakness_chart_user_names,
-    processed_weakness_messages,
-)
-
-from utils.cache.utilities_cache import fetch_user_utility_setting_cache_by_user_name, fetch_user_utility_setting_cache
-from utils.functions.get_pokemeow_reply import get_pokemeow_reply
+from utils.cache.cache_list import (not_weakness_chart_user_names,
+                                    processed_weakness_messages)
+from utils.cache.utilities_cache import (
+    fetch_user_utility_setting_cache,
+    fetch_user_utility_setting_cache_by_user_name)
 from utils.db.utilities_db import update_user_name
-from utils.logs.pretty_log import pretty_log
-from utils.logs.debug_log import debug_log, enable_debug
+from utils.functions.get_pokemeow_reply import get_pokemeow_reply
 from utils.functions.weakness_embed import build_user_weakness_embed_w_o_cache
+from utils.logs.debug_log import debug_log, enable_debug
+from utils.logs.pretty_log import pretty_log
 
 # enable_debug(f"{__name__}.weakness_chart")
 
@@ -208,7 +207,9 @@ async def weakness_chart(bot: discord.Client, message: discord.Message):
         )
         return
 
-    from utils.cache.utilities_cache import fetch_user_utility_setting_cache, fetch_user_utility_setting_cache_by_user_name
+    from utils.cache.utilities_cache import (
+        fetch_user_utility_setting_cache,
+        fetch_user_utility_setting_cache_by_user_name)
 
     different_name = False
 
@@ -231,7 +232,9 @@ async def weakness_chart(bot: discord.Client, message: discord.Message):
                 )
                 display_type = "off"
                 not_weakness_chart_user_names.add(user_name)
-        return
+        else:
+            # No member found either, nothing more we can do for this message.
+            return
     if display_type.lower() == "off":
         debug_log(
             f"Display type is 'off' for user '{user_name}' in {message.channel.name}, skipping weakness chart"
