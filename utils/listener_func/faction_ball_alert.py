@@ -15,7 +15,7 @@ from utils.db.faction_ball_alert_db_func import (
     fetch_user_faction_ball_alert,
     upsert_user_faction_ball_alert_via_user_id,
 )
-from utils.functions.get_pokemeow_reply import get_pokemeow_reply
+from utils.functions.get_pokemeow_reply import get_pokemeow_reply, get_pokemeow_reply_or_interaction_member
 from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
@@ -86,7 +86,7 @@ def resolve_user_id(guild, user_name):
     user_id = fetch_user_id_by_user_name_or_pokemeow_name_cache(user_name)
     if user_id is not None:
         return user_id
-    
+
     return None
 
 
@@ -174,7 +174,7 @@ async def faction_ball_alert(
         user_id = None
         fishing_user = None
 
-        member = await get_pokemeow_reply(before)
+        member = await get_pokemeow_reply_or_interaction_member(before)
         debug_log(f"Reply member: {member}")
         if not member:
             debug_log("No replied member found, attempting fallback extraction")
