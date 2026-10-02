@@ -3,16 +3,13 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 
-from constants.celestial_constants import (
-    BURGER_USER_ID,
-    CC_SERVER_ID,
-    CELESTIAL_TEXT_CHANNELS,
-    CELESTIALS_SERVER_ID,
-)
+from constants.celestial_constants import (BURGER_USER_ID, CC_SERVER_ID,
+                                           CELESTIAL_TEXT_CHANNELS,
+                                           CELESTIALS_SERVER_ID)
 
 LOG_CHANNEL_ID = CELESTIAL_TEXT_CHANNELS.server_logs
 
-ALLOWED_GUILD_IDS = [CELESTIALS_SERVER_ID, CC_SERVER_ID, 1229729585923362816]
+ALLOWED_GUILD_IDS = [CELESTIALS_SERVER_ID, CC_SERVER_ID, 1229729585923362816, 1123414227697287220]  # personal server
 
 from utils.logs.pretty_log import pretty_log
 
