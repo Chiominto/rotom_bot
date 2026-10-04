@@ -3,18 +3,19 @@ import re
 import time
 
 import discord
-from constants.celestial_constants import *
+
 from constants.aesthetics import *
+from constants.celestial_constants import *
 from utils.cache.cache_list import celestial_members_cache
-from utils.logs.pretty_log import pretty_log
-from utils.functions.get_pokemeow_reply import (
-    get_message_interaction_member,
-    get_pokemeow_reply,
-)
-from utils.logs.debug_log import debug_log, enable_debug
-from .pokemon_caught_listener import phone_copy_description
-from utils.db.utilities_db import upsert_utility_setting
 from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache
+from utils.db.utilities_db import upsert_utility_setting
+from utils.functions.get_pokemeow_reply import (get_message_interaction_member,
+                                                get_pokemeow_reply)
+from utils.logs.debug_log import debug_log, enable_debug
+from utils.logs.pretty_log import pretty_log
+
+from .pokemon_caught_listener import phone_copy_description
+
 # Structure: {boss_name: {"time": unix_seconds, "users": set(user_ids), "task": asyncio.Task, "channels": {user_id: channel}}}
 wb_tasks = {}
 
@@ -216,7 +217,8 @@ async def register_wb_battle_reminder(
             return
 
     # Check if their wb_battle alert is on
-    from utils.cache.wb_battle_alert_cache import fetch_wb_battle_alert_notify_cache
+    from utils.cache.wb_battle_alert_cache import \
+        fetch_wb_battle_alert_notify_cache
 
     user_alert_setting = fetch_wb_battle_alert_notify_cache(
         user_id=member.id,
@@ -239,6 +241,10 @@ async def register_wb_battle_reminder(
         notify_channel = guild.get_channel(channel_id)
         if not notify_channel:
             notify_channel = public_channel
+
+    # Final fallback: use the channel where the message happened
+    if not notify_channel:
+        notify_channel = message.channel
 
     unix_seconds = extract_wb_unix_seconds(embed.description)
     boss_name = extract_wb_boss_name(embed.description)
@@ -345,7 +351,8 @@ async def handle_wb_register_command(
         return
 
     # Check if their wb_battle alert is on
-    from utils.cache.wb_battle_alert_cache import fetch_wb_battle_alert_notify_cache
+    from utils.cache.wb_battle_alert_cache import \
+        fetch_wb_battle_alert_notify_cache
 
     user_alert_setting = fetch_wb_battle_alert_notify_cache(
         user_id=member.id,
@@ -368,6 +375,10 @@ async def handle_wb_register_command(
         notify_channel = guild.get_channel(channel_id)
         if not notify_channel:
             notify_channel = public_channel
+
+    # Final fallback: use the channel where the message happened
+    if not notify_channel:
+        notify_channel = message.channel
 
     boss_name, unix_seconds = extract_boss_and_timestamp(embed_description)
     if not boss_name and not unix_seconds:
