@@ -1,19 +1,21 @@
 # 🟣────────────────────────────────────────────
 #           💜 EV Tracker Brain: Track 💜
 # 🟣────────────────────────────────────────────
+import re
 from datetime import datetime
 
 import discord
 
-from utils.functions.visual_helpers import design_embed
-
 from constants.aesthetics import *
-from constants.celestial_constants import CELESTIAL_TEXT_CHANNELS, DEFAULT_EMBED_COLOR
+from constants.celestial_constants import (CELESTIAL_TEXT_CHANNELS,
+                                           DEFAULT_EMBED_COLOR)
 from utils.cache.cache_list import ev_tracker_cache
 from utils.db.ev_tracker_db import add_or_update_ev
 from utils.db.pokemons_db import fetch_emoji_id_db
-from utils.functions.pokemon_func import get_display_name, get_dex_number_by_name
+from utils.functions.pokemon_func import (get_dex_number_by_name,
+                                          get_display_name)
 from utils.functions.pretty_defer import pretty_defer
+from utils.functions.visual_helpers import design_embed
 from utils.functions.webhook_func import send_webhook
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
@@ -55,6 +57,8 @@ async def ev_tracker_add_func(
     spe=None,
 ):
 
+    # 💜 Strip any "#<number>" (dex number) from input, e.g. "Incineroar #727" -> "Incineroar"
+    pokemon = re.sub(r"\s*#\d+", "", pokemon).strip()
 
     emoji_id = None
     user = interaction.user
@@ -117,7 +121,8 @@ async def ev_tracker_add_func(
         return
 
     # ✨──────── Step 2 › Resolve Pokemon ─────✨
-    from utils.cache.pokemon_cache import fetch_emoji_id_cache, check_pokemon_in_cache
+    from utils.cache.pokemon_cache import (check_pokemon_in_cache,
+                                           fetch_emoji_id_cache)
     check_pokemon_in_cache(pokemon)
     if not check_pokemon_in_cache(pokemon):
         await handle.error(content=f"Pokémon '{pokemon}' not found. Please check the name and try again.")
