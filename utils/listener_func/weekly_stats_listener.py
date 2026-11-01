@@ -19,7 +19,7 @@ from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
 from .pokemon_caught_listener import goal_checker
-
+from utils.functions.time_checks import is_saturday_near_midnight_est
 # enable_debug(f"{__name__}.weekly_stats_listener")
 
 
@@ -38,6 +38,11 @@ def extract_current_page_number(footer_text: str) -> int | None:
 async def weekly_stats_listener(
     bot: discord.Client, before_message: discord.Message, after_message: discord.Message
 ):
+    # Check if its Saturday near midnight in US Eastern time
+    if is_saturday_near_midnight_est():
+        debug_log("It's Saturday near midnight EST. Exiting weekly_stats_listener.")
+        return
+    
     embed = after_message.embeds[0] if after_message.embeds else None
     if not embed:
         debug_log("No embed found in edited message. Exiting weekly_stats_listener.")
