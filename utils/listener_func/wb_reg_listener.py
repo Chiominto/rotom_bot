@@ -141,8 +141,7 @@ async def start_world_boss_task(
 ):
     user_id = user.id
 
-    # Subtract 5 seconds for early ping
-    ping_time = unix_seconds - 5
+    ping_time = unix_seconds
 
     # Check if there's an existing task for this boss
     if wb_name in wb_tasks:
