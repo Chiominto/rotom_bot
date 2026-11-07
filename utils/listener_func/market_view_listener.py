@@ -54,8 +54,13 @@ def extract_pokemon_name_from_author(author_name: str) -> str | None:
     return None
 
 
+def _normalize_pokemon_name_for_matching(pokemon_name: str) -> str:
+    return re.sub(r"[-\s]+", "", pokemon_name).casefold()
+
+
 def parse_first_market_listing(
     embed_description: str,
+    target_pokemon_name: str | None = None,
 ) -> Optional[Tuple[str, int, int, str]]:
     """
     Parse the first listing from a PokeMeow market embed description.
@@ -146,6 +151,12 @@ def parse_first_market_listing(
             full_name = f"{form_prefix} {pokemon_name}".strip()
             debug_log(f"Final parsed name: {full_name}")
 
+            if target_pokemon_name and (
+                _normalize_pokemon_name_for_matching(full_name)
+                != _normalize_pokemon_name_for_matching(target_pokemon_name)
+            ):
+                continue
+
             # Extract the full Pokédex emoji (e.g., <:383:821880023661019157>)
             pokemon_emoji_id = None
             all_emojis = re.findall(r"(<:[^:>]+:\d+>)", emoji_block)
@@ -178,7 +189,12 @@ async def market_view_listener(bot: discord.Client, message: discord.Message):
         f"Embed description: {embed_description[:200]}"
         + ("..." if len(embed_description) > 200 else "")
     )
-    listing = parse_first_market_listing(embed_description)
+    parsed_pokemon_name_from_author = extract_pokemon_name_from_author(
+        embed.author.name
+    )
+    listing = parse_first_market_listing(
+        embed_description, parsed_pokemon_name_from_author
+    )
     if listing:
         pokemon_name, price_each, date_listed, pokemon_emoji_id = listing
         debug_log(
@@ -187,9 +203,6 @@ async def market_view_listener(bot: discord.Client, message: discord.Message):
         pretty_log(
             tag="success",
             message=f"Updating market value for {pokemon_name} with price {price_each} listed at {date_listed}",
-        )
-        parsed_pokemon_name_from_author = extract_pokemon_name_from_author(
-            embed.author.name
         )
         if not parsed_pokemon_name_from_author:
             debug_log("Could not extract Pokémon name from embed author.")
@@ -208,6 +221,14 @@ async def market_view_listener(bot: discord.Client, message: discord.Message):
         debug_log("Called update_market_value.")
 
     else:
+        if (
+            parsed_pokemon_name_from_author
+            and parse_first_market_listing(embed_description) is not None
+        ):
+            debug_log(
+                "No market listing matched the Pokémon name from the embed author."
+            )
+            return
         debug_log("No valid market listing found in the embed description.")
         # Extract emoji after '0' as fallback
         emoji_id, pokemon_name = extract_emoji_after_zero(embed_description)

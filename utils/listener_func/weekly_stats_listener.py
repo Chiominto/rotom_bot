@@ -42,7 +42,7 @@ async def weekly_stats_listener(
     if is_saturday_near_midnight_est():
         debug_log("It's Saturday near midnight EST. Exiting weekly_stats_listener.")
         return
-    
+
     embed = after_message.embeds[0] if after_message.embeds else None
     if not embed:
         debug_log("No embed found in edited message. Exiting weekly_stats_listener.")

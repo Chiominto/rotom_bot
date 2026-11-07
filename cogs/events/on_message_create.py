@@ -1,30 +1,41 @@
 import discord
 from discord.ext import commands
 
-from constants.celestial_constants import (CC_SERVER_ID,
-                                           CELESTIAL_TEXT_CHANNELS,
-                                           POKEMEOW_APPLICATION_ID)
+from constants.celestial_constants import (
+    CC_SERVER_ID,
+    CELESTIAL_TEXT_CHANNELS,
+    POKEMEOW_APPLICATION_ID,
+)
 from utils.listener_func.battle_timer import detect_pokemeow_battle
 from utils.listener_func.battle_weakness import weakness_chart
 from utils.listener_func.berry_listener import berry_listener
 from utils.listener_func.berry_water_listener import (
-    handle_berry_water_message, handle_mulch_message)
+    handle_berry_water_message,
+    handle_mulch_message,
+)
 from utils.listener_func.bud_ev_listener import handle_pokemeow_embed_sync
 from utils.listener_func.egg_alert_listener import (
-    egg_hatched_listener, egg_ready_to_hatch_listener)
-from utils.listener_func.ev_tracker_listener import \
-    handle_pokemeow_battle_message
+    egg_hatched_listener,
+    egg_ready_to_hatch_listener,
+)
+from utils.listener_func.ev_tracker_listener import handle_pokemeow_battle_message
 from utils.listener_func.faction_ball_alert import faction_ball_alert
 from utils.listener_func.faction_ball_listener import (
-    extract_faction_ball_from_daily, extract_faction_ball_from_fa)
+    extract_faction_ball_from_daily,
+    extract_faction_ball_from_fa,
+)
 from utils.listener_func.fish_timer import fish_timer_handler
 from utils.listener_func.held_item_ping import held_item_ping_handler
 from utils.listener_func.market_view_listener import market_view_listener
 from utils.listener_func.monthly_stats_listener import monthly_stats_listener
+from utils.listener_func.pokemon_pin_numbers_listener import (
+    pokemon_pin_numbers_listener,
+)
 from utils.listener_func.pokemon_timer import detect_pokemeow_reply
-from utils.listener_func.pokemon_pin_numbers_listener import pokemon_pin_numbers_listener
 from utils.listener_func.special_battle_npc_listener import (
-    special_battle_npc_listener, special_battle_npc_timer_listener)
+    special_battle_npc_listener,
+    special_battle_npc_timer_listener,
+)
 from utils.listener_func.username_change import handle_username_change
 from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
@@ -41,9 +52,11 @@ triggers = {
 }
 import re
 
+
 def get_number_after_exclamation(text):
-    match = re.search(r'!\s*(\d+)', text)
+    match = re.search(r"!\s*(\d+)", text)
     return match.group(1) if match else None
+
 
 # 🟣────────────────────────────────────────────
 #         💤 Message Create Listener Cog
@@ -126,7 +139,7 @@ class MessageCreateListener(commands.Cog):
                 if pin_number:
                     pretty_log(
                         "info",
-                        f"Detected pin number: {pin_number} for message ID: {message.id}"
+                        f"Detected pin number: {pin_number} for message ID: {message.id}",
                     )
                     await pokemon_pin_numbers_listener(
                         bot=self.bot,
@@ -165,7 +178,6 @@ class MessageCreateListener(commands.Cog):
                 and "found a wild" in first_embed.description
             ):
                 await faction_ball_alert(bot=self.bot, before=message, after=message)
-
 
         # ————————————————————————————————
         # ⚡ Daily Command Faction Ball Extraction
@@ -309,13 +321,10 @@ class MessageCreateListener(commands.Cog):
         # ————————————————————————————————
         if message.embeds and message.embeds[0]:
             if (
-                (
-                    ":crossed_swords:" in first_embed_title
-                    or "<:crossed_swords:" in first_embed_title
-                    or "⚔️" in first_embed_title
-                )
-                and "sent out" in first_embed_description
-            ):
+                ":crossed_swords:" in first_embed_title
+                or "<:crossed_swords:" in first_embed_title
+                or "⚔️" in first_embed_title
+            ) and "sent out" in first_embed_description:
                 try:
                     await weakness_chart(bot=self.bot, message=message)
                 except Exception as bw_e:
@@ -406,6 +415,7 @@ class MessageCreateListener(commands.Cog):
                 ),
                 label="Username Change Handler",
             )
+
 
 # 🟣────────────────────────────────────────────
 #         ⚡ Setup Function
