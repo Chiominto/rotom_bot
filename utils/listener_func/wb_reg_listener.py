@@ -6,7 +6,6 @@ import discord
 
 from constants.aesthetics import *
 from constants.celestial_constants import *
-from utils.cache.cache_list import celestial_members_cache
 from utils.cache.utilities_cache import fetch_user_utility_type_setting_cache
 from utils.db.utilities_db import upsert_utility_setting
 from utils.functions.get_pokemeow_reply import (get_message_interaction_member,
@@ -228,22 +227,8 @@ async def register_wb_battle_reminder(
             f"User {member.id} has wb_battle alert off or not set. Skipping reminder registration.",
         )
         return
-    guild = message.guild
-    user_info = celestial_members_cache.get(member.id)
-    channel_id = user_info.get("channel_id") if user_info else None
-    public_channel = guild.get_channel(CELESTIAL_TEXT_CHANNELS.shuckles_swamp)
-    notify_channel = None
-    if not channel_id:
-        # Fallback to public channel
-        notify_channel = public_channel
-    else:
-        notify_channel = guild.get_channel(channel_id)
-        if not notify_channel:
-            notify_channel = public_channel
 
-    # Final fallback: use the channel where the message happened
-    if not notify_channel:
-        notify_channel = message.channel
+    notify_channel = message.channel
 
     unix_seconds = extract_wb_unix_seconds(embed.description)
     boss_name = extract_wb_boss_name(embed.description)
@@ -268,7 +253,7 @@ async def register_wb_battle_reminder(
                 message=message,
             )
             debug_log(
-                f"World boss reminder registered for member {member.name} in channel {notify_channel.name} for boss {boss_name} at unix {unix_seconds}"
+                f"World boss reminder registered for member {member.name} in channel {notify_channel.id} for boss {boss_name} at unix {unix_seconds}"
             )
         except Exception as e:
             debug_log(
@@ -362,22 +347,7 @@ async def handle_wb_register_command(
             f"User {member.id} has wb_battle alert off or not set. Skipping reminder registration.",
         )
         return
-    guild = message.guild
-    user_info = celestial_members_cache.get(member.id)
-    channel_id = user_info.get("channel_id") if user_info else None
-    public_channel = guild.get_channel(CELESTIAL_TEXT_CHANNELS.shuckles_swamp)
-    notify_channel = None
-    if not channel_id:
-        # Fallback to public channel
-        notify_channel = public_channel
-    else:
-        notify_channel = guild.get_channel(channel_id)
-        if not notify_channel:
-            notify_channel = public_channel
-
-    # Final fallback: use the channel where the message happened
-    if not notify_channel:
-        notify_channel = message.channel
+    notify_channel = message.channel
 
     boss_name, unix_seconds = extract_boss_and_timestamp(embed_description)
     if not boss_name and not unix_seconds:
@@ -400,7 +370,7 @@ async def handle_wb_register_command(
             message=message,
         )
         debug_log(
-            f"World boss reminder registered for member {member.name} in channel {notify_channel.name} for boss {boss_name} at unix {unix_seconds}"
+            f"World boss reminder registered for member {member.name} in channel {notify_channel.id} for boss {boss_name} at unix {unix_seconds}"
         )
         pretty_log(
             "info",

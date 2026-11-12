@@ -94,6 +94,17 @@ class Emojis:
     Voltorb = "<:Voltorb:1497788102163304559>"
     hard_stone = "<:Hard_Stone:1503205474965782569>"
     Silver_Powder = "<:Silver_Powder:1503207381058982028>"
+    Net_Ball = "<:Net_Ball:1567825217533902970>"
+    Luxury_Ball = "<:Luxury_Ball:1567825236039172178>"
+    Dive_Ball = "<:Dive_Ball:1567825252359348235>"
+    Lure_Ball = "<:Lure_Ball:1567825195417468948>"
+    Dusk_Ball = "<:Dusk_Ball:1567825086428356618>"
+    Moon_Ball = "<:Moon_Ball:1567825070779408394>"
+    Friend_Ball = "<:Friend_Ball:1567825053419315230>"
+    Love_Ball = "<:Love_Ball:1567824989665759273>"
+    Fast_Ball = "<:Fast_Ball:1567824975711174747>"
+    Heavy_Ball = "<:Heavy_Ball:1567824909466468523>"
+    Quick_Ball = "<:Quick_Ball:1567824813584687104>"
 class Dividers:
     command = "https://media.discordapp.net/attachments/1393740397905313912/1492445431534452807/image.png?ex=69db5b9f&is=69da0a1f&hm=cfe2045c7565dd7be1e494ff49fecffb1c83ec1c7ae51164e546e537325bf187&=&format=webp&quality=lossless&width=1865&height=124"
 
