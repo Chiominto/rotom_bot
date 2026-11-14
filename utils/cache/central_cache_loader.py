@@ -19,6 +19,7 @@ from .research_fossil_alert_cache import load_research_fossil_alert_cache
 from .weekly_goal_tracker_cache import load_weekly_goal_cache
 from .monthly_goal_tracker_cache import load_monthly_goal_cache
 from .pin_numbers_alert_cache import load_pin_numbers_alert_cache
+from .wb_sub_cache import load_wb_ping_cache
 
 async def load_all_cache(bot: discord.Client):
     """
@@ -71,7 +72,7 @@ async def load_all_cache(bot: discord.Client):
 
         # Load Pin Numbers Alert Cache
         await load_pin_numbers_alert_cache(bot)
-        
+
         # Load Utility Cache
         try:
             await load_utility_cache(bot)
@@ -80,6 +81,9 @@ async def load_all_cache(bot: discord.Client):
                 message=f"⚠️ Utility cache failed to load: {util_e}",
                 tag="cache",
             )
+
+        # Load WB Ping Cache
+        await load_wb_ping_cache(bot)
 
     except Exception as e:
         pretty_log(

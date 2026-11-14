@@ -38,6 +38,7 @@ from utils.listener_func.special_battle_npc_listener import (
 )
 from utils.listener_func.username_change import handle_username_change
 from utils.listener_func.wb_reg_listener import register_wb_battle_reminder
+from utils.listener_func.wb_sub import ping_wb_subscribers
 from utils.listener_func.weekly_stats_listener import weekly_stats_listener
 from utils.logs.pretty_log import pretty_log
 
@@ -98,7 +99,18 @@ class MessageCreateListener(commands.Cog):
         first_embed_title = (
             first_embed.title if first_embed and first_embed.title else ""
         )
+        # ————————————————————————————————
+        # ⚡ World Boss Sub Ping
+        # ————————————————————————————————
+        if message.channel.id == CELESTIAL_TEXT_CHANNELS.wb_spawn:
+            try:
+                await ping_wb_subscribers(bot=self.bot, message=message)
 
+            except Exception as e:
+                pretty_log(
+                    "error",
+                    f"WB Sub ping failed for message {message.id}: {e}",
+                )
         # ————————————————————————————————
         # 🏰 Ignore non-PokéMeow bot messages
         # ————————————————————————————————

@@ -287,3 +287,24 @@ monthly_goal_cache: dict[int, dict] = {}
 #   "channel_id": int,
 #   "monthly_requirement_mark": bool,
 # }
+
+# 💜────────────────────────────────────────────
+#       🟣 WB Ping Cache 🌸
+# 💜────────────────────────────────────────────
+WB_PING_CACHE: dict[int, dict[str, dict]] = {}
+# Structure:
+# {
+#   user_id: {
+#       boss_name: {
+#           "user_id": ..,
+#           "user_name": ..,
+#           "variant": ..,
+#           "boss_name": ..,
+#           "mode": ..,
+#           "channel_id": ..,
+#           "created_at": ..
+#       },
+#       ...
+#   },
+#   ...
+# }

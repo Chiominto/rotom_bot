@@ -7,13 +7,11 @@ from datetime import datetime
 import discord
 
 from constants.aesthetics import *
-from constants.celestial_constants import (CELESTIAL_TEXT_CHANNELS,
-                                           DEFAULT_EMBED_COLOR)
+from constants.celestial_constants import CELESTIAL_TEXT_CHANNELS, DEFAULT_EMBED_COLOR
 from utils.cache.cache_list import ev_tracker_cache
 from utils.db.ev_tracker_db import add_or_update_ev
 from utils.db.pokemons_db import fetch_emoji_id_db
-from utils.functions.pokemon_func import (get_dex_number_by_name,
-                                          get_display_name)
+from utils.functions.pokemon_func import get_dex_number_by_name, get_display_name
 from utils.functions.pretty_defer import pretty_defer
 from utils.functions.visual_helpers import design_embed
 from utils.functions.webhook_func import send_webhook
@@ -65,7 +63,9 @@ async def ev_tracker_add_func(
     user_id = user.id
 
     # 💜 Start loader
-    handle = await pretty_defer(interaction, content="Tracking your EVs...", ephemeral=False)
+    handle = await pretty_defer(
+        interaction, content="Tracking your EVs...", ephemeral=False
+    )
 
     # ✨──────── Step 1 › Collect EV stats with goals ─────✨
     evs_to_track = {}
@@ -121,18 +121,17 @@ async def ev_tracker_add_func(
         return
 
     # ✨──────── Step 2 › Resolve Pokemon ─────✨
-    from utils.cache.pokemon_cache import (check_pokemon_in_cache,
-                                           fetch_emoji_id_cache)
+    from utils.cache.pokemon_cache import check_pokemon_in_cache, fetch_emoji_id_cache
+
     check_pokemon_in_cache(pokemon)
     if not check_pokemon_in_cache(pokemon):
-        await handle.error(content=f"Pokémon '{pokemon}' not found. Please check the name and try again.")
+        await handle.error(
+            content=f"Pokémon '{pokemon}' not found. Please check the name and try again."
+        )
         return
 
     pokemon_title = pokemon.title()
     dex_number = get_dex_number_by_name(pokemon_title)
-
-
-
 
     # Fetch emoji ID from cache
 
@@ -174,9 +173,7 @@ async def ev_tracker_add_func(
 
         # ✨──────── Step 4 › Build Confirmation Embed ─────✨
         display_formatted_name = get_display_name(pokemon_title, dex=dex_number)
-        user_desc_lines = [
-            f"- **Pokemon:** {display_formatted_name}\n**EVs:**"
-        ]
+        user_desc_lines = [f"- **Pokemon:** {display_formatted_name}\n**EVs:**"]
         user_desc_lines.extend(build_ev_lines(evs_to_track, goals_to_track))
 
         embed = discord.Embed(
@@ -199,7 +196,6 @@ async def ev_tracker_add_func(
         pretty_log(
             tag="sent",
             message=f"User {user.name} started tracking {pokemon_title} EVs: {evs_to_track} with goals {goals_to_track}",
-
         )
         formatted_name = get_display_name(pokemon_title, dex=True)
 
@@ -231,6 +227,5 @@ async def ev_tracker_add_func(
         pretty_log(
             tag="error",
             message=f"Failed to track EVs for user {user_id}: {e}",
-
         )
         await handle.error(content=f"Failed to track EVs: {e}")

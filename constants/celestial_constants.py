@@ -16,6 +16,7 @@ WEEKLY_REQUIREMENT = 500
 # 💦☁────────────────────────────────────────────💦☁
 class CELESTIAL_TEXT_CHANNELS:
     goal_tracker = 1502845251671556228
+    wb_spawn = 1570715343481999390
 
     # 🌊💙🤍───────────── Admin ─────────────💙🤍🌊
     roles_breakdown = 1492921526591291563
