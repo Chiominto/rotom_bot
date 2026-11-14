@@ -85,6 +85,7 @@ class WBSUBGROUP(commands.Cog):
         boss_name="The boss name",
         variant="Regular, Shiny or Both",
         mode="How to notify you?",
+        channel="The channel to send notifications to (if mode is Channel)",
     )
 
     async def wb_sub_add(
@@ -93,6 +94,7 @@ class WBSUBGROUP(commands.Cog):
         boss_name: str,
         variant: Literal["Regular", "Shiny", "Both"],
         mode: Literal["DM", "Channel"],
+        channel: discord.TextChannel | None = None,
     ):
         slash_cmd_name = "wb-sub add"
 
@@ -104,6 +106,7 @@ class WBSUBGROUP(commands.Cog):
             boss_name=boss_name,
             variant=variant,
             mode=mode,
+            channel=channel,
         )
 
     wb_sub_add.extras = {"category": "Public"}
