@@ -1,4 +1,4 @@
-from utils.db.daily_fa_ball import fetch_all_faction_balls
+from utils.db.daily_fa_ball import FACTIONS, fetch_all_faction_balls
 from utils.logs.pretty_log import pretty_log
 from utils.cache.cache_list import daily_faction_ball_cache
 # 🌸──────────────────────────────────────────────
@@ -28,19 +28,20 @@ async def load_daily_faction_ball_cache(bot):
 # 🍥──────────────────────────────────────────────
 def update_daily_faction_ball_cache(faction: str, ball_type: str | None):
     """Update a specific faction ball in the cache."""
-    if faction in daily_faction_ball_cache:
-        daily_faction_ball_cache[faction] = ball_type
-        pretty_log(
-            tag="cache",
-            message=f"Updated {faction} ball in cache to {ball_type}.",
-            bot=None,
-        )
-    else:
+    if faction not in FACTIONS:
         pretty_log(
             tag="info",
             message=f"Attempted to update invalid faction {faction} in cache.",
             bot=None,
         )
+        return
+
+    daily_faction_ball_cache[faction] = ball_type
+    pretty_log(
+        tag="cache",
+        message=f"Updated {faction} ball in cache to {ball_type}.",
+        bot=None,
+    )
 
 
 # 🧁──────────────────────────────────────────────

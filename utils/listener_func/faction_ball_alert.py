@@ -5,16 +5,20 @@ import discord
 from constants.aesthetics import Emojis
 from constants.faction_data import get_faction_by_emoji
 from utils.cache.cache_list import (
-    daily_faction_ball_cache,
     faction_ball_alert_cache,
     faction_cache,
     processed_faction_ball_alerts,
+)
+from utils.cache.daily_fa_ball_cache import (
+    get_faction_ball,
+    update_daily_faction_ball_cache,
 )
 from utils.cache.faction_cache import get_user_id_by_name
 from utils.db.faction_ball_alert_db_func import (
     fetch_user_faction_ball_alert,
     upsert_user_faction_ball_alert_via_user_id,
 )
+from utils.db.daily_fa_ball import fetch_faction_ball
 from utils.functions.get_pokemeow_reply import get_pokemeow_reply, get_pokemeow_reply_or_interaction_member
 from utils.functions.retry_function import _retry_discord_call
 from utils.logs.debug_log import debug_log, enable_debug
@@ -23,7 +27,7 @@ from utils.cache.celestial_members_cache import (
     fetch_user_id_by_user_name_or_pokemeow_name_cache,
 )
 
-# enable_debug(f"{__name__}.faction_ball_alert")
+#enable_debug(f"{__name__}.faction_ball_alert")
 FISHING_COLOR = 0x87CEFA
 
 
@@ -345,9 +349,11 @@ async def faction_ball_alert(
             content = f"{user_mention} I don't know your faction yet, can you do `;fa`? Thanks!"
             await _retry_discord_call(after.channel.send, content=content)
             return
-        from utils.cache.daily_fa_ball_cache import get_faction_ball
-
         faction_ball = get_faction_ball(user_faction)
+        if faction_ball is None:
+            faction_ball = await fetch_faction_ball(bot, user_faction)
+            if faction_ball is not None:
+                update_daily_faction_ball_cache(user_faction, faction_ball)
         debug_log(f"Faction daily ball: {faction_ball}")
         if not faction_ball:
             content = f"{user_mention} I don't know your faction's daily ball yet, can you do `;fa`? Thanks!."

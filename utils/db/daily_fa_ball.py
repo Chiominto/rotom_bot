@@ -25,6 +25,18 @@ async def fetch_all_faction_balls(bot) -> dict:
         return {f: None for f in FACTIONS}
 
 
+async def fetch_faction_ball(bot, faction: str) -> str | None:
+    """Fetch one faction's daily ball directly from the database."""
+    if faction not in FACTIONS:
+        raise ValueError(f"Invalid faction: {faction}")
+
+    async with bot.pg_pool.acquire() as conn:
+        row = await conn.fetchrow(
+            f"SELECT {faction} FROM daily_faction_ball WHERE id = 1"
+        )
+        return row[faction] if row else None
+
+
 # 🍥──────────────────────────────────────────────
 #   Update a Specific Faction Ball Value
 # 🍥──────────────────────────────────────────────
