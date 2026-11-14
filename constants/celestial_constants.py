@@ -187,3 +187,5 @@ class CELESTIAL_EMOJIS:
     lordfry = "<:LordFry:1490453099008102410>"
     sparkles = "<a:sparkles:1492709079108288574>"
     snorlax_coin = "<:snorlax_coin:1492785677518114906>"
+    gmax = "<:gigantamax:1493002883371630684>"
+    sgmax = "<:shinygigantamax:1493002893119459398>"
