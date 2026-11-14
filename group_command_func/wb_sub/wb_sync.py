@@ -1,4 +1,4 @@
-from group_command_func.wb_sub import wb_sub_db_func as db
+from utils.db import wb_sub_db_func as db
 from utils.cache.wb_sub_cache import (
     wb_cache_remove,
     wb_cache_remove_all,
