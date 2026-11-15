@@ -3,12 +3,12 @@ from typing import Dict
 
 import discord
 
-
 from constants.wb_constants import *
 from utils.cache.cache_list import WB_PING_CACHE
+from utils.logs.pretty_log import pretty_log
 
 # 🤍━━━━━━━━━━━━━━━━━━━━━━━━━━
-#   ✨ Espeon Core Function › WB SUB PINGER ✨
+#   WB SUB PINGER ✨
 # 🤍━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 
@@ -38,15 +38,22 @@ async def ping_wb_subscribers(bot: discord.Client, message: discord.Message):
         if "has spawned" not in content:
             return
 
-        # Extract boss_name after 'gigantamax-' or 'eternamax-'
+        # Extract a supported boss name from the spawn text.
         gmax_match = re.search(r"gigantamax-([a-z0-9\-]+)", content)
         emax_match = re.search(r"eternamax-([a-z0-9\-]+)", content)
+        urshifu_match = re.search(
+            r"(urshifu-(?:singlestrike|rapidstrike))",
+            content,
+        )
         if gmax_match:
             boss_name = gmax_match.group(1).lower()
             form_prefix = "Gigantamax"
         elif emax_match:
             boss_name = emax_match.group(1).lower()
             form_prefix = "Eternamax"
+        elif urshifu_match:
+            boss_name = urshifu_match.group(1).lower()
+            form_prefix = None
         else:
             return
 
@@ -56,14 +63,20 @@ async def ping_wb_subscribers(bot: discord.Client, message: discord.Message):
         if variant == "shiny":
             emoji = WBEmojis.Sgmax
 
-        display_boss_name = f"{emoji} {form_prefix}-{boss_name.title()}"
+        display_boss_name = (
+            f"{emoji} {form_prefix}-{boss_name.title()}"
+            if form_prefix
+            else f"{emoji} {boss_name.title()}"
+        )
         pings_by_channel: Dict[int, list[int]] = {}
         dm_user_ids: list[tuple[int, int | None]] = []  # (user_id, channel_id)
 
         for user_id, bosses in WB_PING_CACHE.items():
             if not isinstance(bosses, dict):
-                print(
-                    f"[ping_wb_subscribers] Skipping user {user_id}: bosses not a dict"
+                pretty_log(
+                    "warn",
+                    f"Skipping user {user_id}: bosses not a dict",
+                    label="💠 WB SUB",
                 )
                 continue
 
@@ -93,15 +106,20 @@ async def ping_wb_subscribers(bot: discord.Client, message: discord.Message):
                         )
                     else:
                         if not isinstance(channel_id, int):
-                            print(
-                                f"[ping_wb_subscribers] Skipping {user_id} {sub_boss_name}: invalid channel_id"
+                            pretty_log(
+                                "warn",
+                                f"Skipping {user_id} {sub_boss_name}: invalid channel_id",
+                                label="💠 WB SUB",
                             )
                             continue
                         pings_by_channel.setdefault(channel_id, []).append(user_id)
 
                 except Exception as inner_e:
-                    print(
-                        f"[ping_wb_subscribers] Skipping subscription for user {user_id}, boss '{sub_boss_name_raw}': {inner_e}\nEntry: {info}"
+                    pretty_log(
+                        "warn",
+                        f"Skipping subscription for user {user_id}, boss "
+                        f"'{sub_boss_name_raw}': {inner_e}\nEntry: {info}",
+                        label="💠 WB SUB",
                     )
 
         # Send channel pings
@@ -122,11 +140,17 @@ async def ping_wb_subscribers(bot: discord.Client, message: discord.Message):
                                 f"{display_boss_name} has spawned! Don't forget to register your team ~"
                             )
                         except Exception as dm_e:
-                            print(f"[ping_wb_subscribers] Failed to DM {uid}: {dm_e}")
+                            pretty_log(
+                                "warn",
+                                f"Failed to DM {uid}: {dm_e}",
+                                label="💠 WB SUB",
+                            )
 
             except Exception as send_e:
-                print(
-                    f"[ping_wb_subscribers] Failed to send in channel {channel_id}: {send_e}"
+                pretty_log(
+                    "error",
+                    f"Failed to send in channel {channel_id}: {send_e}",
+                    label="💠 WB SUB",
                 )
 
         # Send DMs for users with mode = "dm"
@@ -137,8 +161,10 @@ async def ping_wb_subscribers(bot: discord.Client, message: discord.Message):
                     f"{display_boss_name} has spawned! Don't forget to register your team ~"
                 )
             except Exception as dm_e:
-                print(
-                    f"[ping_wb_subscribers] Failed to DM {uid}: {dm_e} — trying channel fallback"
+                pretty_log(
+                    "warn",
+                    f"Failed to DM {uid}: {dm_e} — trying channel fallback",
+                    label="💠 WB SUB",
                 )
                 if fallback_channel_id:
                     try:
@@ -149,13 +175,22 @@ async def ping_wb_subscribers(bot: discord.Client, message: discord.Message):
                                 allowed_mentions=discord.AllowedMentions(users=True),
                             )
                         else:
-                            print(
-                                f"[ping_wb_subscribers] Fallback channel {fallback_channel_id} not found for {uid}"
+                            pretty_log(
+                                "warn",
+                                f"Fallback channel {fallback_channel_id} not found "
+                                f"for {uid}",
+                                label="💠 WB SUB",
                             )
                     except Exception as fallback_e:
-                        print(
-                            f"[ping_wb_subscribers] Fallback channel send failed for {uid}: {fallback_e}"
+                        pretty_log(
+                            "error",
+                            f"Fallback channel send failed for {uid}: {fallback_e}",
+                            label="💠 WB SUB",
                         )
 
     except Exception as e:
-        print(f"[ping_wb_subscribers] General failure: {e}")
+        pretty_log(
+            "error",
+            f"General failure: {e}",
+            label="💠 WB SUB",
+        )
