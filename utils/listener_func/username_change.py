@@ -3,7 +3,7 @@ import re
 import discord
 
 from utils.db.faction_db import upsert_new_name
-from utils.functions.get_pokemeow_reply import get_pokemeow_reply
+from utils.functions.get_pokemeow_reply import get_pokemeow_reply_or_interaction_member
 from utils.logs.debug_log import debug_log, enable_debug
 from utils.logs.pretty_log import pretty_log
 
@@ -21,7 +21,7 @@ async def handle_username_change(bot: discord.Client, message:discord.Message):
     # Handle a username change by updating faction username in database
 
     # Extract member ID first
-    member = await get_pokemeow_reply(message)
+    member = await get_pokemeow_reply_or_interaction_member(message)
     if not member:
         pretty_log(
             "warning",
