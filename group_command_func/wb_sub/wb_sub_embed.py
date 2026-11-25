@@ -98,7 +98,7 @@ def create_wb_embed(
     if image:
         embed.set_thumbnail(url=image)
     embed.set_footer(
-        text="Check your WB subscriptions with /settings",
+        text="Check your WB subscriptions with /wb-sub view",
         icon_url=guild.icon.url,
     )
 
